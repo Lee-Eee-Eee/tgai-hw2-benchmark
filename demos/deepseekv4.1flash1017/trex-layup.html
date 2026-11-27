@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123a3a">
+<title>霸王龙三步上篮 · T-Rex Layup</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #123a3a;
+    --cream: #f8ecd4;
+    --coral: #e56846;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  body {
+    background: #102f31;
+    color: var(--cream);
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pennant-cloth {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: pennant-sway 4.6s ease-in-out infinite alternate;
+  }
+  .pennant-b { animation-duration: 5.8s; animation-delay: -1.4s; }
+  .pennant-c { animation-duration: 4.1s; animation-delay: -2.1s; }
+
+  .light-pulse {
+    animation: light-pulse 5.5s ease-in-out infinite alternate;
+  }
+
+  .scene.is-paused * {
+    animation-play-state: paused !important;
+  }
+
+  /* — playback control — */
+  .playback {
+    position: fixed;
+    right: clamp(16px, 2.4vw, 34px);
+    bottom: clamp(16px, 2.4vw, 30px);
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 40px;
+    padding: 0 15px 0 12px;
+    border: 1px solid rgba(248, 236, 212, .24);
+    border-radius: 999px;
+    background: rgba(11, 40, 41, .66);
+    color: var(--cream);
+    font: 600 11px/1 "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+    letter-spacing: .14em;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .16);
+    transition: background .2s ease, transform .2s ease, border-color .2s ease;
+  }
+
+  .playback:hover {
+    background: rgba(20, 61, 60, .92);
+    border-color: rgba(248, 236, 212, .55);
+    transform: translateY(-1px);
+  }
+
+  .playback:focus-visible {
+    outline: 2px solid var(--cream);
+    outline-offset: 3px;
+  }
+
+  .playback svg {
+    width: 15px;
+    height: 15px;
+    display: block;
+    flex: none;
+  }
+
+  .playback .play-icon { display: none; }
+  .playback.is-paused .pause-icon { display: none; }
+  .playback.is-paused .play-icon { display: block; }
+
+  .mobile-note { display: none; }
+
+  .desktop-caption {
+    position: fixed;
+    left: clamp(20px, 3.6vw, 52px);
+    bottom: clamp(20px, 3.2vw, 36px);
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--cream);
+    pointer-events: none;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .22);
+  }
+
+  .desktop-caption .caption-rule {
+    width: 32px;
+    height: 2px;
+    margin-bottom: 2px;
+    background: var(--coral);
+    border-radius: 2px;
+  }
+
+  .desktop-caption .caption-title {
+    margin: 0;
+    font-size: clamp(20px, 2.2vw, 30px);
+    font-weight: 800;
+    letter-spacing: .06em;
+    line-height: 1.05;
+  }
+
+  .desktop-caption .caption-sub {
+    margin: 0;
+    color: #d4b795;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  @media (max-aspect-ratio: 1/1) {
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(13px, 2.8vh, 24px);
+      padding: 24px 12px;
+      background:
+        radial-gradient(circle at 50% 30%, #1e514b 0%, #123a3a 48%, #0a282a 100%);
+    }
+
+    .stage {
+      flex: none;
+      width: min(calc(100vw - 24px), calc((100vh - 250px) * 1.5), 760px);
+      height: auto;
+      aspect-ratio: 3 / 2;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 26px 70px rgba(0, 0, 0, .42);
+    }
+
+    .scene { width: 100%; height: 100%; }
+
+    .mobile-note {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      text-align: center;
+      color: var(--cream);
+    }
+
+    .desktop-caption { display: none; }
+
+    .mobile-note .rule {
+      width: 34px;
+      height: 2px;
+      margin-bottom: 2px;
+      border-radius: 2px;
+      background: var(--coral);
+    }
+
+    .mobile-note h1 {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      font-size: clamp(23px, 6vw, 34px);
+      font-weight: 800;
+      letter-spacing: .04em;
+      line-height: 1.05;
+    }
+
+    .mobile-note p {
+      margin: 0;
+      color: #c8a987;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .19em;
+      text-transform: uppercase;
+    }
+
+    .playback {
+      position: static;
+      flex: none;
+      align-self: center;
+      background: rgba(18, 58, 58, .9);
+    }
+  }
+
+  @keyframes pennant-sway {
+    from { transform: rotate(-1.4deg) skewX(1deg); }
+    to   { transform: rotate(1.8deg) skewX(-1deg); }
+  }
+
+  @keyframes light-pulse {
+    from { opacity: .42; }
+    to   { opacity: .74; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene * {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+    .playback { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <svg class="scene" id="scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"
+       role="img" aria-labelledby="trex-title trex-desc">
+    <title id="trex-title">霸王龙三步上篮</title>
+    <desc id="trex-desc">一只穿着球衣的霸王龙在球场上运球，迈出三步后高高跃起，把篮球送进篮筐，记分牌随即加上两分。动画可暂停。</desc>
+
+    <defs>
+      <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0b292b"/>
+        <stop offset=".58" stop-color="#143f3e"/>
+        <stop offset="1" stop-color="#1b4a45"/>
+      </linearGradient>
+
+      <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c78b4f"/>
+        <stop offset=".35" stop-color="#dfa25f"/>
+        <stop offset="1" stop-color="#b97842"/>
+      </linearGradient>
+
+      <radialGradient id="floorGlow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#ffe1a8" stop-opacity=".64"/>
+        <stop offset=".55" stop-color="#f5c37c" stop-opacity=".2"/>
+        <stop offset="1" stop-color="#f5c37c" stop-opacity="0"/>
+      </radialGradient>
+
+      <radialGradient id="wallGlow" cx=".5" cy=".25" r=".7">
+        <stop offset="0" stop-color="#f6d9a7" stop-opacity=".2"/>
+        <stop offset=".55" stop-color="#d6ab74" stop-opacity=".06"/>
+        <stop offset="1" stop-color="#0b292b" stop-opacity="0"/>
+      </radialGradient>
+
+      <linearGradient id="dinoGrad" x1=".2" y1="0" x2=".65" y2="1">
+        <stop offset="0" stop-color="#82b97e"/>
+        <stop offset=".58" stop-color="#64a26b"/>
+        <stop offset="1" stop-color="#4c855a"/>
+      </linearGradient>
+
+      <linearGradient id="dinoFarGrad" x1="0" y1="0" x2=".6" y2="1">
+        <stop offset="0" stop-color="#568d60"/>
+        <stop offset="1" stop-color="#3f7550"/>
+      </linearGradient>
+
+      <linearGradient id="bellyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f9edda"/>
+        <stop offset="1" stop-color="#e7cfab"/>
+      </linearGradient>
+
+      <linearGradient id="jerseyGrad" x1="0" y1="0" x2=".5" y2="1">
+        <stop offset="0" stop-color="#f18158"/>
+        <stop offset=".55" stop-color="#e56846"/>
+        <stop offset="1" stop-color="#c94f37"/>
+      </linearGradient>
+
+      <linearGradient id="boardGrad" x1="0" y1="0" x2=".6" y2="1">
+        <stop offset="0" stop-color="#eaf5e9"/>
+        <stop offset=".62" stop-color="#c7e1d4"/>
+        <stop offset="1" stop-color="#9fc7ba"/>
+      </linearGradient>
+
+      <radialGradient id="ballGrad" cx=".35" cy=".28" r=".78">
+        <stop offset="0" stop-color="#f7b267"/>
+        <stop offset=".5" stop-color="#e57a3f"/>
+        <stop offset="1" stop-color="#c9552b"/>
+      </radialGradient>
+
+      <linearGradient id="shoeGrad" x1="0" y1="0" x2=".7" y2="1">
+        <stop offset="0" stop-color="#fff4dd"/>
+        <stop offset="1" stop-color="#e4c49a"/>
+      </linearGradient>
+
+      <clipPath id="torsoClip">
+        <path d="M -48 -20
+                 C -75 -95 -30 -170 35 -190
+                 C 92 -207 150 -182 166 -138
+                 C 180 -98 161 -50 128 -14
+                 C 100 16 56 34 18 34
+                 C -15 34 -42 16 -48 -20Z"/>
+      </clipPath>
+
+      <clipPath id="ballClip">
+        <circle r="26"/>
+      </clipPath>
+    </defs>
+
+    <!-- ======================= arena ======================= -->
+    <rect width="1200" height="800" fill="url(#wallGrad)"/>
+    <rect width="1200" height="800" fill="url(#wallGlow)"/>
+
+    <!-- faint wall graphics -->
+    <g aria-hidden="true" opacity=".07" fill="none" stroke="#f8ecd4">
+      <circle cx="585" cy="335" r="218" stroke-width="2"/>
+      <circle cx="585" cy="335" r="172" stroke-width="1.2"/>
+      <path d="M367 335h436M585 117v436" stroke-width="1"/>
+      <path d="M463 195c54 58 54 222 0 280M707 195c-54 58-54 222 0 280" stroke-width="2"/>
+      <circle cx="585" cy="335" r="116" stroke-width="1.2" stroke-dasharray="2 9"/>
+    </g>
+
+    <!-- wall panel seams -->
+    <g aria-hidden="true" stroke="#061f21" stroke-width="2" opacity=".22">
+      <path d="M110 0v537M295 0v537M880 0v537M1070 0v537M0 427h1200"/>
+      <path d="M0 531h1200" stroke="#e3c295" stroke-width="2" opacity=".4"/>
+    </g>
+
+    <!-- arena light pools -->
+    <g aria-hidden="true" class="light-pulse">
+      <path d="M100 0h170L160 510H-40Z" fill="#f4d2a0" opacity=".08"/>
+      <path d="M940 0h160l74 510H878Z" fill="#f4d2a0" opacity=".07"/>
+      <ellipse cx="285" cy="110" rx="250" ry="90" fill="#f4d2a0" opacity=".09"/>
+      <ellipse cx="936" cy="74" rx="220" ry="80" fill="#f4d2a0" opacity=".1"/>
+    </g>
+
+    <!-- pennant string -->
+    <g aria-hidden="true">
+      <path d="M362 34C515 89 758 88 927 28" fill="none" stroke="#e7cfaa" stroke-width="2" opacity=".5"/>
+      <g>
+        <g transform="translate(430 57)"><g class="pennant-cloth"><path d="M0 0l19 4-2 39-17-15Z" fill="#e56846" opacity=".8"/></g></g>
+        <g transform="translate(506 72)"><g class="pennant-cloth pennant-b"><path d="M0 0l19 2 2 39-19-13Z" fill="#efdfc2" opacity=".7"/></g></g>
+        <g transform="translate(584 82)"><g class="pennant-cloth pennant-c"><path d="M0 0l20 1 4 38-22-12Z" fill="#3f7c6c" opacity=".85"/></g></g>
+        <g transform="translate(666 84)"><g class="pennant-cloth pennant-b"><path d="M0 0l20-1 6 37-24-10Z" fill="#e56846" opacity=".7"/></g></g>
+        <g transform="translate(748 77)"><g class="pennant-cloth"><path d="M0 0l20-2 5 38-23-11Z" fill="#efdfc2" opacity=".62"/></g></g>
+        <g transform="translate(826 62)"><g class="pennant-cloth pennant-c"><path d="M0 0l19-3 2 39-19-14Z" fill="#3f7c6c" opacity=".76"/></g></g>
+      </g>
+    </g>
+
+    <!-- ======================= scoreboard ======================= -->
+    <g id="scoreboard" aria-hidden="true">
+      <rect x="54" y="54" width="310" height="154" rx="17" fill="#092527" stroke="#d8b990" stroke-width="4"/>
+      <rect x="64" y="64" width="290" height="134" rx="12" fill="#0d2d2e" stroke="#264d48" stroke-width="2"/>
+      <circle cx="70" cy="70" r="2.3" fill="#e1c095"/>
+      <circle cx="348" cy="70" r="2.3" fill="#e1c095"/>
+      <circle cx="70" cy="192" r="2.3" fill="#e1c095"/>
+      <circle cx="348" cy="192" r="2.3" fill="#e1c095"/>
+
+      <text x="209" y="87" text-anchor="middle" fill="#d8b990" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="12" font-weight="700" letter-spacing="3.3">RAPTOR ARENA</text>
+      <path d="M76 97h266" stroke="#f8ecd4" stroke-width="1" opacity=".16"/>
+
+      <text x="82" y="119" fill="#8fb2a2" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="9" font-weight="700" letter-spacing="2">HOME</text>
+      <text x="82" y="134" fill="#f8ecd4" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="14" font-weight="700" letter-spacing="1">T-REX</text>
+      <text id="scoreValue" x="177" y="177" text-anchor="middle" fill="#ffb363" font-family="'Courier New', Consolas, monospace" font-size="61" font-weight="700" letter-spacing="-4">00</text>
+
+      <path d="M225 108v61" stroke="#f8ecd4" stroke-width="1" opacity=".14"/>
+      <text x="277" y="119" text-anchor="middle" fill="#8fb2a2" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="9" font-weight="700" letter-spacing="2">3-STEP</text>
+
+      <g id="stepDots" font-family="Consolas, monospace" font-size="9" font-weight="700" text-anchor="middle">
+        <circle id="stepDot1" cx="248" cy="139" r="10" fill="#102f30" stroke="#e3c39b" stroke-width="1.4"/>
+        <circle id="stepDot2" cx="278" cy="139" r="10" fill="#102f30" stroke="#e3c39b" stroke-width="1.4"/>
+        <circle id="stepDot3" cx="308" cy="139" r="10" fill="#102f30" stroke="#e3c39b" stroke-width="1.4"/>
+        <text id="stepText1" x="248" y="142" fill="#9ab7a7">1</text>
+        <text id="stepText2" x="278" y="142" fill="#9ab7a7">2</text>
+        <text id="stepText3" x="308" y="142" fill="#9ab7a7">3</text>
+      </g>
+      <text id="phaseText" x="277" y="172" text-anchor="middle" fill="#ffb363" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">READY</text>
+      <rect id="scoreFlash" x="64" y="64" width="290" height="134" rx="12" fill="#ffb363" opacity="0"/>
+    </g>
+
+    <!-- ======================= court ======================= -->
+    <path d="M0 568h1200v232H0Z" fill="url(#floorGrad)"/>
+    <g aria-hidden="true" stroke="#8f5d33" stroke-width="1.2" opacity=".28">
+      <path d="M0 601h1200M0 636h1200M0 678h1200M0 727h1200M0 778h1200"/>
+      <path d="M122 568v232M297 568v232M478 568v232M665 568v232M854 568v232M1033 568v232"/>
+      <path d="M0 568h1200" stroke="#f3dfc0" stroke-width="2" opacity=".45"/>
+    </g>
+
+    <g aria-hidden="true" opacity=".45" fill="none" stroke="#f4e4c6" stroke-width="3">
+      <path d="M62 756C360 744 735 718 1120 610" opacity=".7"/>
+      <ellipse cx="758" cy="720" rx="148" ry="43" opacity=".6"/>
+      <path d="M1094 583v190" opacity=".5"/>
+      <path d="M888 582v192M1032 582v181" opacity=".28"/>
+    </g>
+
+    <ellipse id="followLight" cx="470" cy="652" rx="300" ry="105" fill="url(#floorGlow)" opacity=".8"/>
+    <ellipse cx="1020" cy="652" rx="220" ry="77" fill="url(#floorGlow)" opacity=".5"/>
+
+    <!-- ======================= hoop ======================= -->
+    <g aria-hidden="true">
+      <ellipse cx="1138" cy="664" rx="52" ry="12" fill="#6c4228" opacity=".3"/>
+      <path d="M1138 164v496" stroke="#0c2b2c" stroke-width="25" stroke-linecap="round"/>
+      <path d="M1138 164v496" stroke="#2c6560" stroke-width="14" stroke-linecap="round"/>
+      <path d="M1138 181C1119 178 1109 178 1096 184" fill="none" stroke="#0c2b2c" stroke-width="14" stroke-linecap="round"/>
+      <path d="M1138 181C1119 178 1109 178 1096 184" fill="none" stroke="#2c6560" stroke-width="7" stroke-linecap="round"/>
+      <path d="M1060 657h96" stroke="#0c2b2c" stroke-width="18" stroke-linecap="round"/>
+      <path d="M1060 657h96" stroke="#2c6560" stroke-width="10" stroke-linecap="round"/>
+
+      <path d="M1039 78v24" stroke="#0c2b2c" stroke-width="5"/>
+      <rect x="1004" y="47" width="74" height="34" rx="6" fill="#0b2426" stroke="#e3c39b" stroke-width="2.5"/>
+      <text x="1041" y="71" text-anchor="middle" fill="#f1704e" font-family="'Courier New', Consolas, monospace" font-size="21" font-weight="700">24</text>
+
+      <rect x="952" y="104" width="164" height="198" rx="10" fill="url(#boardGrad)" stroke="#f1ddbb" stroke-width="8"/>
+      <rect x="961" y="113" width="146" height="180" rx="6" fill="none" stroke="#1b4e4a" stroke-width="2" opacity=".55"/>
+      <rect x="1004" y="195" width="68" height="66" rx="2" fill="none" stroke="#e56846" stroke-width="4"/>
+      <path d="M1039 149l6 10-6 10-6-10Z" fill="#e56846" opacity=".65"/>
+      <path d="M1116 302h24" stroke="#0c2b2c" stroke-width="10" stroke-linecap="round"/>
+
+      <!-- back half of the rim sits behind the ball -->
+      <path d="M948 318C964 302 1076 302 1092 318" fill="none" stroke="#f1704e" stroke-width="10" stroke-linecap="round"/>
+      <path d="M949 316C966 305 1073 305 1091 316" fill="none" stroke="#ffb27a" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>
+    </g>
+
+    <!-- ======================= action ======================= -->
+    <g id="actLayer">
+      <!-- movement marks under the feet -->
+      <g id="footprints" aria-hidden="true" fill="#f7e7cd">
+        <g id="print1" opacity="0">
+          <path d="M-17 7C-10 3-8-4-8-11L-2-11C-1-4 1 2 4 6L9-11 15-10 14 4 25-6 29 0 15 13C8 18-2 18-9 15Z"/>
+          <path d="M-7 14C1 17 10 16 17 12" fill="none" stroke="#e56846" stroke-width="2" opacity=".55"/>
+        </g>
+        <g id="print2" opacity="0">
+          <path d="M-17 7C-10 3-8-4-8-11L-2-11C-1-4 1 2 4 6L9-11 15-10 14 4 25-6 29 0 15 13C8 18-2 18-9 15Z"/>
+          <path d="M-7 14C1 17 10 16 17 12" fill="none" stroke="#e56846" stroke-width="2" opacity=".55"/>
+        </g>
+        <g id="print3" opacity="0">
+          <path d="M-17 7C-10 3-8-4-8-11L-2-11C-1-4 1 2 4 6L9-11 15-10 14 4 25-6 29 0 15 13C8 18-2 18-9 15Z"/>
+          <path d="M-7 14C1 17 10 16 17 12" fill="none" stroke="#e56846" stroke-width="2" opacity=".55"/>
+        </g>
+      </g>
+
+      <ellipse id="trexShadow" cx="390" cy="657" rx="154" ry="22" fill="#092c2d" opacity=".3"/>
+      <ellipse id="ballShadow" cx="600" cy="650" rx="27" ry="9" fill="#092c2d" opacity=".15"/>
+
+      <!-- ======================= t-rex ======================= -->
+      <g id="trex">
+        <!-- tail -->
+        <g id="tail">
+          <path d="M-27 -38
+                   C-96 -62 -174 -80 -244 -82
+                   C-295 -84 -330 -64 -345 -35
+                   C-311 -18 -273 -5 -229 7
+                   C-163 26 -92 43 -28 38Z"
+                fill="url(#dinoGrad)" stroke="#123b3c" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M-338 -38C-306 -20 -270 -7 -226 6C-164 25 -95 41 -30 35"
+                fill="none" stroke="#efddbe" stroke-width="15" opacity=".75" stroke-linecap="round"/>
+          <g fill="#3d7652" opacity=".85">
+            <path d="M-92 -64l8-15 10 12Z"/>
+            <path d="M-147 -76l7-14 11 12Z"/>
+            <path d="M-205 -84l7-13 11 11Z"/>
+            <path d="M-258 -82l6-12 10 10Z"/>
+          </g>
+          <g fill="none" stroke="#3e7953" stroke-width="3" opacity=".75" stroke-linecap="round">
+            <path d="M-101 -38c9 8 19 14 31 18M-158 -44c11 8 23 14 36 18M-217 -46c12 7 25 12 39 15"/>
+          </g>
+        </g>
+
+        <!-- far leg -->
+        <g id="legFar" transform="translate(-18 8)">
+          <g id="legFarThigh">
+            <path d="M-31 -15C-47 15-39 60-2 94C27 81 44 43 35 5C28 -17-13 -29-31 -15Z"
+                  fill="url(#dinoFarGrad)" stroke="#123b3c" stroke-width="4.6" stroke-linejoin="round"/>
+            <path d="M-22 2c-8 24-1 51 19 70" fill="none" stroke="#376d4c" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+            <g transform="translate(0 92)">
+              <g id="legFarShin">
+                <path d="M-16 0C-26 26-19 60 0 84C18 65 25 32 15 0Z"
+                      fill="#4e8357" stroke="#123b3c" stroke-width="4.4" stroke-linejoin="round"/>
+                <g transform="translate(0 84)">
+                  <g id="legFarFoot">
+                    <path d="M-15 -9C-27 -3-30 11-21 19L3 26C33 31 59 24 67 11C71 2 62 -7 49 -11L23 -17C7 -22 -6 -18 -15 -9Z"
+                          fill="#c9b390" stroke="#123b3c" stroke-width="4.2" stroke-linejoin="round"/>
+                    <path d="M-23 18C-5 27 38 30 66 17L62 26C43 34 6 33 -19 24Z"
+                          fill="#f0e1c7" stroke="#123b3c" stroke-width="2.2" stroke-linejoin="round"/>
+                    <path d="M-16 7C2 16 40 19 63 10" fill="none" stroke="#b06a4a" stroke-width="3.8" stroke-linecap="round" opacity=".8"/>
+                    <path d="M-15 -8C-20 -20 -11 -30 2 -28C13 -27 18 -18 15 -8" fill="none" stroke="#e6d3b4" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M4-6L23 8M12-9L31 5M20-10L39 3" fill="none" stroke="#826547" stroke-width="2.2" stroke-linecap="round"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- torso -->
+        <path d="M-48 -20
+                 C-75 -95 -30 -170 35 -190
+                 C92 -207 150 -182 166 -138
+                 C180 -98 161 -50 128 -14
+                 C100 16 56 34 18 34
+                 C-15 34 -42 16 -48 -20Z"
+              fill="url(#dinoGrad)" stroke="#123b3c" stroke-width="5" stroke-linejoin="round"/>
+
+        <g clip-path="url(#torsoClip)">
+          <path d="M-54 -6C-18 26 54 36 142 -8C154-14 162-25 166-38C147 5 103 30 55 34C12 38-30 27-54 -6Z"
+                fill="url(#bellyGrad)" opacity=".9"/>
+
+          <path d="M2 -150
+                   C28 -171 78 -181 114 -164
+                   C136 -154 150 -133 153 -111
+                   L146 -44
+                   C111 -56 81 -44 55 -18
+                   C39 0 26 17 21 34
+                   L-3 6
+                   C-19 -36 -17 -108 2 -150Z"
+                fill="url(#jerseyGrad)" stroke="#173f3d" stroke-width="3.2" stroke-linejoin="round"/>
+
+          <path d="M2 -150
+                   C15 -162 33 -169 51 -166
+                   C36 -119 28 -64 24 -20
+                   L15 9
+                   L-1 30
+                   C-13 -31 -16 -101 2 -150Z"
+                fill="#1c554e" opacity=".96"/>
+          <path d="M51 -166C38 -120 29 -63 25 -19" fill="none" stroke="#f8ecd4" stroke-width="4.4"/>
+          <path d="M18 -144C47 -132 81 -131 111 -147" fill="none" stroke="#f8ecd4" stroke-width="3.4" opacity=".9"/>
+          <path d="M16 12C47 0 81 -17 119 -36" fill="none" stroke="#f2ddb8" stroke-width="3" opacity=".8"/>
+          <g transform="translate(34 -127)">
+            <circle r="10" fill="none" stroke="#f8ecd4" stroke-width="2" opacity=".85"/>
+            <path d="M-10 0h20M0-10v20M-7-7c8 4 8 10 0 14M7-7c-8 4-8 10 0 14" fill="none" stroke="#f8ecd4" stroke-width="1.3" opacity=".68"/>
+          </g>
+
+          <text x="101" y="-113" text-anchor="middle" fill="#fff2da" font-family="'Arial Narrow', 'Segoe UI', sans-serif" font-size="8" font-weight="700" letter-spacing="1.8">RAPTORS</text>
+          <text x="101" y="-66" text-anchor="middle" fill="#fff5e5" stroke="#173f3d" stroke-width="1.4" paint-order="stroke" font-family="'Arial Black', Impact, sans-serif" font-size="43" font-weight="900" transform="rotate(-5 101 -82)">3</text>
+          <path d="M78 -46c11 3 21 2 30-4" fill="none" stroke="#f8ecd4" stroke-width="3" stroke-linecap="round" opacity=".75"/>
+        </g>
+
+        <!-- near leg, in front of the jersey so the stride reads clearly -->
+        <g id="legNear" transform="translate(32 12)">
+          <g id="legNearThigh">
+            <path d="M-33 -15C-49 16-40 62-2 95C29 81 47 42 37 3C29 -19-12 -31-33 -15Z"
+                  fill="url(#dinoGrad)" stroke="#123b3c" stroke-width="4.8" stroke-linejoin="round"/>
+            <path d="M-24 2c-9 24-2 53 20 73" fill="none" stroke="#3d7652" stroke-width="3.2" stroke-linecap="round" opacity=".7"/>
+            <g transform="translate(0 92)">
+              <g id="legNearShin">
+                <path d="M-17 0C-27 26-20 61 0 84C19 65 26 32 16 0Z"
+                      fill="#5c9564" stroke="#123b3c" stroke-width="4.6" stroke-linejoin="round"/>
+                <g transform="translate(0 84)">
+                  <g id="legNearFoot">
+                    <path d="M-16 -11
+                             C-29 -4 -32 10 -22 20
+                             L3 27
+                             C34 32 61 25 69 11
+                             C74 1 64 -9 50 -13
+                             L24 -19
+                             C7 -24 -7 -20 -16 -11Z"
+                          fill="url(#shoeGrad)" stroke="#123b3c" stroke-width="4.4" stroke-linejoin="round"/>
+                    <path d="M-24 18C-6 28 39 31 68 17L64 27C43 36 5 34 -20 24Z"
+                          fill="#fff9ec" stroke="#123b3c" stroke-width="2.2" stroke-linejoin="round"/>
+                    <path d="M-17 7C1 17 41 20 64 10" fill="none" stroke="#e56846" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M-16 -10C-22 -23 -12 -34 2 -32C14 -30 20 -20 17 -9" fill="none" stroke="#f8ecd4" stroke-width="7" stroke-linecap="round"/>
+                    <path d="M-16 -10C-22 -23 -12 -34 2 -32C14 -30 20 -20 17 -9" fill="none" stroke="#123b3c" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+                    <path d="M5-7L25 8M13-10L33 5M21-11L42 3" fill="none" stroke="#7d6145" stroke-width="2.3" stroke-linecap="round"/>
+                    <path d="M45-10c9 3 15 8 18 14" fill="none" stroke="#2b685d" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="33" cy="12" r="3" fill="#e56846" stroke="#123b3c" stroke-width="2"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- shorts -->
+        <path d="M-34 -7C-2 -25 70 -27 135 -3L140 45C101 60 49 62 5 52C-19 46-39 22-34 -7Z"
+              fill="#174c49" stroke="#123b3c" stroke-width="4.4" stroke-linejoin="round"/>
+        <path d="M-27 -3C2 -17 72 -19 131 -1" fill="none" stroke="#f2ddb8" stroke-width="4" opacity=".9"/>
+        <path d="M-21 3C10 19 87 17 126 2" fill="none" stroke="#e56846" stroke-width="2.4" opacity=".8"/>
+        <path d="M-14 37C17 52 78 52 116 35" fill="none" stroke="#e56846" stroke-width="4" opacity=".85"/>
+        <path d="M18 49c3 29 22 49 47 53M92 48c-2 26 0 45 11 55" fill="none" stroke="#123b3c" stroke-width="3" opacity=".5"/>
+
+        <!-- neck -->
+        <path d="M78 -155C94 -205 126 -235 173 -245C197 -250 219 -241 231 -222L205 -190C183 -185 165 -166 154 -141C139 -111 104 -124 78 -155Z"
+              fill="url(#dinoGrad)" stroke="#123b3c" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M101 -150C108 -185 134 -211 168 -226" fill="none" stroke="#f0ddbd" stroke-width="10" opacity=".5" stroke-linecap="round"/>
+
+        <!-- head -->
+        <g id="head" transform="rotate(0 185 -225)">
+          <g id="headbandTails">
+            <path d="M196 -246C173 -263 145 -267 117 -257C139 -250 157 -239 171 -225C179 -233 187 -240 196 -246Z"
+                  fill="#e56846" stroke="#123b3c" stroke-width="3.2" stroke-linejoin="round"/>
+            <path d="M194 -238C174 -236 155 -227 141 -214C160 -213 178 -218 193 -227Z"
+                  fill="#d95d3e" stroke="#123b3c" stroke-width="2.8" stroke-linejoin="round"/>
+            <path d="M175 -252c-11-3-21-1-30 5M166 -224c-9 5-17 12-22 20" fill="none" stroke="#f6d3ae" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+          </g>
+
+          <path d="M166 -221C172 -252 192 -275 222 -281C248 -287 272 -276 292 -261C309 -248 323 -235 336 -222C347 -212 350 -199 344 -189C338 -179 324 -177 310 -182C293 -188 275 -186 259 -179C243 -172 227 -169 213 -176C195 -185 179 -200 172 -215C168 -218 166 -220 166 -221Z"
+                fill="url(#dinoGrad)" stroke="#123b3c" stroke-width="5" stroke-linejoin="round"/>
+
+          <!-- mouth interior, revealed when jaw drops -->
+          <path d="M207 -177C236 -172 282 -169 333 -175C321 -159 298 -152 272 -156C247 -160 224 -167 207 -177Z"
+                fill="#5a2e2a" stroke="#123b3c" stroke-width="3" stroke-linejoin="round"/>
+
+          <g id="jaw">
+            <path d="M205 -174C232 -183 273 -185 307 -182C327 -180 337 -172 333 -163C327 -153 308 -149 288 -152C262 -156 237 -162 218 -168C208 -171 202 -170 205 -174Z"
+                  fill="#568c5f" stroke="#123b3c" stroke-width="4.6" stroke-linejoin="round"/>
+            <path d="M224 -165C250 -159 286 -160 318 -169C307 -158 286 -154 264 -157C246 -160 234 -162 224 -165Z"
+                  fill="#eedcba" opacity=".9"/>
+            <path d="M230 -166c7 0 14 1 21 3M274 -166c8 0 16-1 23-3" fill="none" stroke="#b89c75" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>
+          </g>
+
+          <g fill="#f8ecd4" stroke="#123b3c" stroke-width="1.4">
+            <path d="M300 -178l4 10 6-10Z"/>
+            <path d="M318 -179l4 9 5-10Z"/>
+            <path d="M332 -181l3 8 5-9Z"/>
+          </g>
+
+          <!-- eye -->
+          <g>
+            <path d="M227 -247C239 -255 256 -252 264 -241C252 -235 237 -236 228 -242Z" fill="#123b3c" opacity=".5"/>
+            <circle cx="249" cy="-231" r="11.5" fill="#fff7e9" stroke="#123b3c" stroke-width="2.8"/>
+            <circle cx="253" cy="-231" r="5.7" fill="#d65f3d"/>
+            <circle cx="253" cy="-231" r="3.2" fill="#123b3c"/>
+            <circle cx="255" cy="-233" r="1.5" fill="#fffdf7"/>
+            <path d="M236 -243C243 -249 254 -248 261 -242" fill="none" stroke="#123b3c" stroke-width="3" stroke-linecap="round"/>
+            <path d="M226 -220C234 -215 244 -214 253 -218" fill="none" stroke="#e2cbaa" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+          </g>
+
+          <circle cx="333" cy="-194" r="2.6" fill="#123b3c" opacity=".7"/>
+          <g fill="#3f7650" opacity=".75">
+            <circle cx="284" cy="-252" r="3"/>
+            <circle cx="300" cy="-243" r="2"/>
+            <circle cx="235" cy="-258" r="2.2"/>
+          </g>
+          <path d="M202 -195c10 2 18 0 25-6M196 -181c7 1 13 0 19-4" fill="none" stroke="#3c7250" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+
+          <!-- headband -->
+          <path d="M191 -239C214 -264 252 -274 282 -256L273 -241C248 -254 218 -250 201 -229Z"
+                fill="#e56846" stroke="#123b3c" stroke-width="3.6" stroke-linejoin="round"/>
+          <path d="M203 -241C222 -259 249 -264 269 -253" fill="none" stroke="#f7d9b2" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+          <circle cx="275" cy="-246" r="4.2" fill="#f3bf65" stroke="#123b3c" stroke-width="2"/>
+        </g>
+
+        <!-- far arm, kept in front of the neck so its tiny victory pump reads -->
+        <g id="armFar">
+          <path id="armFarOutline" d="M128 -128Q154 -108 177 -77" fill="none" stroke="#123b3c" stroke-width="20" stroke-linecap="round"/>
+          <path id="armFarFill" d="M128 -128Q154 -108 177 -77" fill="none" stroke="#487e56" stroke-width="12.5" stroke-linecap="round"/>
+          <g id="handFar" transform="translate(177 -77)">
+            <path d="M-4 6C1 1 8 1 13-2C9 5 10 8 13 11C6 12 1 10-4 6Z" fill="#4f8558" stroke="#123b3c" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M0 4l-6 4M5 1l4 4M8-1l6 3" fill="none" stroke="#173f3d" stroke-width="1.8" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <!-- near arm -->
+        <g id="armNear">
+          <path id="armNearOutline" d="M144 -120Q191 -104 214 -65" fill="none" stroke="#123b3c" stroke-width="23" stroke-linecap="round"/>
+          <path id="armNearFill" d="M144 -120Q191 -104 214 -65" fill="none" stroke="#68a46e" stroke-width="14.5" stroke-linecap="round"/>
+          <circle cx="144" cy="-120" r="10" fill="#69a56f" stroke="#123b3c" stroke-width="3"/>
+          <g id="handNear" transform="translate(214 -65)">
+            <path d="M-4 6C1 1 8 1 14-2C9 5 10 8 14 11C6 12 1 10-4 6Z" fill="#68a46e" stroke="#123b3c" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M0 4l-7 4M5 1l4 4M9-1l7 3" fill="none" stroke="#173f3d" stroke-width="1.8" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- ghost balls during the shot -->
+      <g id="ballTrail" aria-hidden="true" fill="#f0a05c" opacity="0">
+        <circle id="trail1" r="20" opacity=".18"/>
+        <circle id="trail2" r="16" opacity=".12"/>
+        <circle id="trail3" r="12" opacity=".08"/>
+      </g>
+
+      <!-- ball -->
+      <g id="ball" transform="translate(600 450)">
+        <circle r="26" fill="url(#ballGrad)" stroke="#123b3c" stroke-width="3"/>
+        <g clip-path="url(#ballClip)" fill="none" stroke="#79371f" stroke-width="2.4" opacity=".85">
+          <path d="M0-27v54M-27 0h54"/>
+          <path d="M-21-17C-7-6-7 6-21 17M21-17C7-6 7 6 21 17"/>
+          <path d="M-26 7C-10 2 10 2 26 7"/>
+        </g>
+        <path d="M-16-18C-8-23 2-24 10-21" fill="none" stroke="#ffd4a0" stroke-width="3.4" stroke-linecap="round" opacity=".6"/>
+      </g>
+
+      <!-- claws curling over the ball while it is held -->
+      <g id="gripClaws" opacity="0">
+        <path d="M-7 6C-1 2 5 1 10-2C7 4 8 7 11 10C4 11-1 9-7 6Z" fill="#6ba66f" stroke="#123b3c" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M-4 4l-5 3M1 2l2 5" fill="none" stroke="#173f3d" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+
+      <!-- dust and landing effects -->
+      <g id="dust" aria-hidden="true" fill="#f7e7cd"></g>
+    </g>
+
+    <!-- ======================= rim front and net ======================= -->
+    <g aria-hidden="true">
+      <g id="net" transform="translate(1020 318)">
+        <g id="netMesh" fill="none" stroke="#f4e5cb" stroke-linecap="round">
+          <g stroke-width="1.7" opacity=".85">
+            <path d="M-67 5C-57 35-43 70-28 100"/>
+            <path d="M-48 11C-39 42-26 73-13 103"/>
+            <path d="M-27 15C-17 46-4 78 4 105"/>
+            <path d="M-5 17C4 47 15 77 22 105"/>
+            <path d="M18 16C27 44 37 71 43 100"/>
+            <path d="M42 13C50 38 60 64 66 91"/>
+            <path d="M61 8C68 30 74 52 80 80"/>
+          </g>
+          <g stroke-width="1.5" opacity=".65">
+            <path d="M-54 35C-27 43 29 43 55 34"/>
+            <path d="M-41 62C-17 70 21 69 44 61"/>
+            <path d="M-25 86C-4 92 17 91 32 84"/>
+            <path d="M-28 100C-12 106 12 105 24 101"/>
+          </g>
+        </g>
+      </g>
+      <path d="M948 318C964 334 1076 334 1092 318" fill="none" stroke="#f1704e" stroke-width="10" stroke-linecap="round"/>
+      <path d="M950 319C967 331 1073 331 1090 319" fill="none" stroke="#ffb27a" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+      <path d="M1038 300v12" stroke="#123b3c" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <!-- score celebration confetti -->
+    <g id="confetti" aria-hidden="true"></g>
+  </svg>
+</div>
+
+<div class="desktop-caption">
+  <span class="caption-rule"></span>
+  <p class="caption-title">霸王龙三步上篮</p>
+  <p class="caption-sub">T-REX &middot; THREE-STEP LAYUP</p>
+</div>
+
+<div class="mobile-note">
+  <span class="rule"></span>
+  <h1>霸王龙三步上篮</h1>
+  <p>T-REX &middot; THREE-STEP LAYUP</p>
+</div>
+
+<button class="playback" id="playback" type="button" aria-label="暂停动画" title="暂停（空格）">
+  <svg viewBox="0 0 16 16" aria-hidden="true">
+    <g class="pause-icon" fill="currentColor">
+      <rect x="2.7" y="2.2" width="3.7" height="11.6" rx="1.5"/>
+      <rect x="9.6" y="2.2" width="3.7" height="11.6" rx="1.5"/>
+    </g>
+    <path class="play-icon" d="M4.4 2.6c0-1 1.1-1.6 1.9-1.1l7.1 5.4c.7.5.7 1.6 0 2.1L6.3 14.5c-.8.6-1.9 0-1.9-1.1Z" fill="currentColor"/>
+  </svg>
+  <span id="playbackLabel">暂停</span>
+</button>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const scene = $("scene");
+  const playback = $("playback");
+  const playbackLabel = $("playbackLabel");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const LOOP = 5.8;
+  const JUMP_START = 2.15;
+  const JUMP_END = 3.3;
+  const RELEASE_TIME = 2.82;
+  const SCORE_TIME = 3.24;
+  const GROUND_ANKLE = 633;
+  const RIM = { x: 1020, y: 318 };
+  const THIGH = 92;
+  const SHIN = 84;
+  const TAU = Math.PI * 2;
+
+  const trex = $("trex");
+  const tail = $("tail");
+  const head = $("head");
+  const jaw = $("jaw");
+  const headbandTails = $("headbandTails");
+  const scoreValue = $("scoreValue");
+  const phaseText = $("phaseText");
+  const scoreFlash = $("scoreFlash");
+  const stepDots = [$("stepDot1"), $("stepDot2"), $("stepDot3")];
+  const stepTexts = [$("stepText1"), $("stepText2"), $("stepText3")];
+  const trexShadow = $("trexShadow");
+  const ballShadow = $("ballShadow");
+  const followLight = $("followLight");
+  const ball = $("ball");
+  const ballTrail = $("ballTrail");
+  const trailDots = [$("trail1"), $("trail2"), $("trail3")];
+  const gripClaws = $("gripClaws");
+  const netMesh = $("netMesh");
+  const actLayer = $("actLayer");
+  const footprints = [$("print1"), $("print2"), $("print3")];
+  const dust = $("dust");
+  const confetti = $("confetti");
+
+  const legs = {
+    near: {
+      hip: { x: 32, y: 12 },
+      root: $("legNear"),
+      thigh: $("legNearThigh"),
+      shin: $("legNearShin"),
+      foot: $("legNearFoot")
+    },
+    far: {
+      hip: { x: -18, y: 8 },
+      root: $("legFar"),
+      thigh: $("legFarThigh"),
+      shin: $("legFarShin"),
+      foot: $("legFarFoot")
+    }
+  };
+
+  const arms = {
+    near: {
+      shoulder: { x: 144, y: -120 },
+      outline: $("armNearOutline"),
+      fill: $("armNearFill"),
+      hand: $("handNear")
+    },
+    far: {
+      shoulder: { x: 128, y: -128 },
+      outline: $("armFarOutline"),
+      fill: $("armFarFill"),
+      hand: $("handFar")
+    }
+  };
+
+  let paused = reduceMotion.matches;
+  let virtualTime = reduceMotion.matches ? 2.72 : 0;
+  let lastFrame = performance.now();
+  let lastScore = null;
+  let lastPhase = null;
+  let stepLit = [false, false, false];
+
+  // ---------- math helpers ----------
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const smoothstep = (u) => u * u * (3 - 2 * u);
+  const smooth = (u) => smoothstep(clamp(u, 0, 1));
+
+  function track(t, keys, ease = smooth) {
+    if (t <= keys[0][0]) return keys[0][1];
+    for (let i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        const [t0, v0] = keys[i - 1];
+        const [t1, v1] = keys[i];
+        const u = ease((t - t0) / Math.max(0.0001, t1 - t0));
+        return lerp(v0, v1, u);
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+
+  function deg(rad) { return rad * 180 / Math.PI; }
+
+  function pointTrack(t, keys, ease = smooth) {
+    if (t <= keys[0][0]) return { x: keys[0][1], y: keys[0][2] };
+    for (let i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        const [t0, x0, y0] = keys[i - 1];
+        const [t1, x1, y1] = keys[i];
+        const u = ease((t - t0) / Math.max(0.0001, t1 - t0));
+        return { x: lerp(x0, x1, u), y: lerp(y0, y1, u) };
+      }
+    }
+    const lastKey = keys[keys.length - 1];
+    return { x: lastKey[1], y: lastKey[2] };
+  }
+
+  // ---------- roooot motion ----------
+  function getRoot(t) {
+    let x = track(t, [
+      [0, 360], [0.95, 360], [1.15, 400], [1.55, 460],
+      [1.95, 505], [2.15, 535], [2.55, 580], [2.85, 580],
+      [3.30, 590], [3.7, 590], [5.8, 590]
+    ]);
+
+    let y;
+    if (t >= JUMP_START && t <= JUMP_END) {
+      const u = (t - JUMP_START) / (JUMP_END - JUMP_START);
+      y = 514 - 110 * 4 * u * (1 - u);
+    } else {
+      y = track(t, [
+        [0, 500], [0.9, 500], [1.15, 500], [1.55, 500],
+        [1.95, 501], [2.15, 514], [3.30, 514], [3.56, 500],
+        [3.80, 500], [3.98, 486], [4.12, 500], [4.28, 490],
+        [4.45, 500], [4.75, 500], [5.8, 500]
+      ]);
+    }
+    return { x, y };
+  }
+
+  // ---------- foot targets ----------
+  function planted(worldX, root) {
+    return {
+      x: worldX - root.x,
+      y: GROUND_ANKLE - root.y,
+      footAngle: 0,
+      planted: true
+    };
+  }
+
+  function swing(fromX, toX, u, lift, root) {
+    const s = smooth(u);
+    return {
+      x: lerp(fromX - root.x, toX - root.x, s),
+      y: GROUND_ANKLE - root.y - Math.sin(Math.PI * s) * lift,
+      footAngle: -24 * Math.sin(Math.PI * s),
+      planted: false
+    };
+  }
+
+  function airborne(t, which) {
+    const near = which === "near";
+    const xKeys = near
+      ? [[JUMP_START, 20], [2.5, 112], [2.8, 125], [3.12, 85], [JUMP_END, 70]]
+      : [[JUMP_START, -35], [2.5, -70], [2.8, -88], [3.12, -60], [JUMP_END, -55]];
+    const yKeys = near
+      ? [[JUMP_START, 122], [2.5, 75], [2.8, 84], [3.12, 108], [JUMP_END, 122]]
+      : [[JUMP_START, 122], [2.5, 112], [2.8, 112], [3.12, 115], [JUMP_END, 122]];
+    const angleKeys = [[JUMP_START, 0], [2.36, 20], [2.76, 15], [3.05, -5], [JUMP_END, 0]];
+    return {
+      x: track(t, xKeys),
+      y: track(t, yKeys),
+      footAngle: track(t, angleKeys),
+      planted: false
+    };
+  }
+
+  function getLegTarget(which, t, root) {
+    if (which === "near") {
+      if (t < 0.95) return planted(425, root);
+      if (t < 1.15) return swing(425, 455, (t - 0.95) / 0.20, 55, root);
+      if (t < 1.55) return planted(455, root);
+      if (t < 1.95) return swing(455, 555, (t - 1.55) / 0.40, 66, root);
+      if (t < 2.15) return planted(555, root);
+      if (t < JUMP_END) return airborne(t, "near");
+      return planted(660, root);
+    }
+    if (t < 1.15) return planted(335, root);
+    if (t < 1.55) return swing(335, 505, (t - 1.15) / 0.40, 76, root);
+    if (t < 2.15) return planted(505, root);
+    if (t < JUMP_END) return airborne(t, "far");
+    return planted(535, root);
+  }
+
+  function solveLeg(leg, target) {
+    const dx = target.x - leg.hip.x;
+    const dy = target.y - leg.hip.y;
+    const raw = Math.hypot(dx, dy);
+    const d = clamp(raw, Math.abs(THIGH - SHIN) + 1, THIGH + SHIN - 1);
+    const ux = dx / (raw || 1);
+    const uy = dy / (raw || 1);
+    const a = (THIGH * THIGH - SHIN * SHIN + d * d) / (2 * d);
+    const h = Math.sqrt(Math.max(0, THIGH * THIGH - a * a));
+    const knee = {
+      x: leg.hip.x + ux * a + uy * h,
+      y: leg.hip.y + uy * a - ux * h
+    };
+    const ankle = {
+      x: leg.hip.x + ux * d,
+      y: leg.hip.y + uy * d
+    };
+    return { knee, ankle };
+  }
+
+  function placeLeg(leg, target) {
+    const solved = solveLeg(leg, target);
+    const thighAbs = Math.atan2(solved.knee.x - leg.hip.x, solved.knee.y - leg.hip.y);
+    const shinAbs = Math.atan2(solved.ankle.x - solved.knee.x, solved.ankle.y - solved.knee.y);
+    const footAbs = target.footAngle * Math.PI / 180;
+    leg.thigh.setAttribute("transform", `rotate(${deg(thighAbs).toFixed(2)} 0 0)`);
+    leg.shin.setAttribute("transform", `rotate(${deg(shinAbs - thighAbs).toFixed(2)} 0 0)`);
+    leg.foot.setAttribute("transform", `rotate(${deg(footAbs - shinAbs).toFixed(2)} 0 0)`);
+  }
+
+  // ---------- ball ----------
+  function getHoldLocal(t) {
+    return pointTrack(t, [
+      [0.90, 230, -75],
+      [1.15, 236, -80],
+      [1.55, 240, -84],
+      [1.95, 244, -88],
+      [2.15, 242, -86],
+      [2.45, 270, -98],
+      [2.65, 330, -112],
+      [2.82, 365, -122]
+    ]);
+  }
+
+  function getBallState(t, root) {
+    let x, y, held = false, visible = true, spinT = t;
+
+    if (t < 0.90) {
+      const u = smooth((t - 0.16) / 0.68);
+      const handX = root.x + 234;
+      const handY = root.y - 58;
+      const floorY = 634;
+      x = handX + 15 * Math.sin(Math.PI * u);
+      y = handY + (floorY - handY) * Math.sin(Math.PI * u);
+      spinT = t * 2;
+    } else if (t < RELEASE_TIME) {
+      const hold = getHoldLocal(t);
+      x = root.x + hold.x;
+      y = root.y + hold.y;
+      held = true;
+      spinT = t * 1.5;
+    } else if (t < SCORE_TIME) {
+      const u = clamp((t - RELEASE_TIME) / (SCORE_TIME - RELEASE_TIME), 0, 1);
+      const p0 = (() => {
+        const r0 = getRoot(RELEASE_TIME);
+        const h0 = getHoldLocal(RELEASE_TIME);
+        return { x: r0.x + h0.x, y: r0.y + h0.y };
+      })();
+      const p1 = { x: 970, y: 244 };
+      const p2 = { x: 1010, y: 265 };
+      const p3 = { x: RIM.x, y: RIM.y };
+      const v = 1 - u;
+      x = v * v * v * p0.x + 3 * v * v * u * p1.x + 3 * v * u * u * p2.x + u * u * u * p3.x;
+      y = v * v * v * p0.y + 3 * v * v * u * p1.y + 3 * v * u * u * p2.y + u * u * u * p3.y;
+      spinT = t * 5.5;
+    } else {
+      const dt = t - SCORE_TIME;
+      if (dt < 0.30) {
+        x = RIM.x + 2 * Math.sin(dt * 9);
+        y = RIM.y + 15 * dt / 0.30 + 20 * Math.sin(dt / 0.30 * Math.PI * 0.5);
+      } else {
+        const dt2 = dt - 0.30;
+        if (dt2 < 0.34) {
+          x = RIM.x + 3;
+          y = 333 + 303 * smooth(dt2 / 0.34);
+        } else {
+          const dt3 = dt2 - 0.34;
+          const bounce = Math.abs(Math.sin(dt3 * 8.8)) * 124 * Math.exp(-dt3 * 2.15);
+          x = 1023 - Math.min(30, dt3 * 16);
+          y = 636 - bounce;
+        }
+      }
+      spinT = t * 3;
+    }
+
+    const jumpHeight = clamp(500 - root.y, 0, 140);
+    if (y > 660) visible = false;
+
+    return { x, y, held, visible, spinT, jumpHeight };
+  }
+
+  // ---------- arms ----------
+  function getArms(t, root, ballState) {
+    let near, far;
+
+    if (t < 0.90) {
+      near = { x: 212, y: -56 + Math.sin(t * 12) * 5 };
+      far = { x: 180, y: -72 + Math.sin(t * 10 + 1) * 4 };
+    } else if (t < RELEASE_TIME) {
+      const hold = getHoldLocal(t);
+      near = { x: hold.x - 17, y: hold.y + 9 };
+      if (t < 2.35) {
+        far = { x: hold.x - 31, y: hold.y - 2 };
+      } else {
+        const u = smooth((t - 2.35) / (RELEASE_TIME - 2.35));
+        far = { x: lerp(hold.x - 31, 212, u), y: lerp(hold.y - 2, -153, u) };
+      }
+    } else if (t < 3.08) {
+      near = { x: 338, y: -148 };
+      far = { x: 195, y: -122 };
+    } else if (t < 3.55) {
+      const u = smooth((t - 3.08) / 0.47);
+      near = { x: lerp(338, 220, u), y: lerp(-148, -118, u) };
+      far = { x: 190, y: lerp(-122, -132, u) };
+    } else {
+      const wave = Math.sin(t * 11) * 6;
+      const hop = Math.sin(clamp((t - 3.8) / 0.9, 0, 1) * Math.PI) * 7;
+      near = { x: 268 + wave, y: -132 + hop };
+      far = { x: 94 - wave, y: -146 + hop };
+    }
+    return { near, far };
+  }
+
+  function drawArm(arm, target, wiggle = 0) {
+    const sx = arm.shoulder.x;
+    const sy = arm.shoulder.y;
+    const mx = (sx + target.x) / 2;
+    const my = (sy + target.y) / 2;
+    const dx = target.x - sx;
+    const dy = target.y - sy;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    const bend = clamp(len * 0.11, 7, 23) + wiggle;
+    const cx = mx - dy / len * bend;
+    const cy = my + dx / len * bend + 5;
+    const d = `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${target.x.toFixed(1)} ${target.y.toFixed(1)}`;
+    arm.outline.setAttribute("d", d);
+    arm.fill.setAttribute("d", d);
+    const angle = deg(Math.atan2(dy, dx));
+    arm.hand.setAttribute("transform", `translate(${target.x.toFixed(1)} ${target.y.toFixed(1)}) rotate(${angle.toFixed(1)})`);
+  }
+
+  // ---------- dynamic scoreboard ----------
+  const stepEvents = [1.15, 1.55, 1.95];
+  const stepPositions = [455, 505, 555];
+
+  function phaseAt(t) {
+    if (t < 0.9) return "DRIBBLE";
+    if (t < 1.35) return "STEP 1";
+    if (t < 1.75) return "STEP 2";
+    if (t < 2.12) return "STEP 3";
+    if (t < RELEASE_TIME) return "TAKE FLIGHT";
+    if (t < SCORE_TIME) return "LAYUP...";
+    return "SWISH! +2";
+  }
+
+  function updateHUD(t) {
+    const score = t >= SCORE_TIME ? 2 : 0;
+    if (score !== lastScore) {
+      lastScore = score;
+      scoreValue.textContent = score === 0 ? "00" : "02";
+      if (score === 2) {
+        scoreFlash.setAttribute("opacity", ".28");
+      }
+    }
+    const phase = phaseAt(t);
+    if (phase !== lastPhase) {
+      lastPhase = phase;
+      phaseText.textContent = phase;
+    }
+    const sinceScore = t - SCORE_TIME;
+    scoreFlash.setAttribute("opacity", sinceScore >= 0 && sinceScore < .34 ? (0.34 - sinceScore) * 0.82 : 0);
+
+    for (let i = 0; i < 3; i++) {
+      const lit = t >= stepEvents[i];
+      if (lit !== stepLit[i]) {
+        stepLit[i] = lit;
+        stepDots[i].setAttribute("fill", lit ? "#ffb363" : "#102f30");
+        stepDots[i].setAttribute("stroke", lit ? "#ffe0ad" : "#e3c39b");
+        stepTexts[i].setAttribute("fill", lit ? "#123a3a" : "#9ab7a7");
+      }
+    }
+  }
+
+  // ---------- particles ----------
+  const confettiPieces = [];
+  const confettiColors = ["#f8ecd4", "#e56846", "#f3b65b", "#6ca36e", "#d5e5d8"];
+  for (let i = 0; i < 22; i++) {
+    const isRect = i % 3 !== 0;
+    const el = document.createElementNS("http://www.w3.org/2000/svg", isRect ? "rect" : "circle");
+    if (isRect) {
+      el.setAttribute("width", 9 + (i % 4) * 3);
+      el.setAttribute("height", 5 + (i % 3) * 3);
+      el.setAttribute("rx", 1.5);
+    } else {
+      el.setAttribute("r", 4 + (i % 3));
+    }
+    el.setAttribute("fill", confettiColors[i % confettiColors.length]);
+    confetti.appendChild(el);
+    confettiPieces.push({
+      el,
+      x0: 770 + ((i * 53) % 335),
+      y0: 286 + (i % 4) * 10,
+      vx: -155 + (i * 47) % 310,
+      vy: -230 - (i % 5) * 32,
+      spin: -240 + (i * 113) % 480,
+      delay: (i % 6) * 0.032
+    });
+  }
+
+  const dustPuffs = [];
+  const dustEvents = [
+    { t: 1.15, x: 462 },
+    { t: 1.55, x: 512 },
+    { t: 1.95, x: 562 },
+    { t: 3.30, x: 620 }
+  ];
+  dustEvents.forEach((event) => {
+    for (let i = 0; i < 3; i++) {
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("fill", "#f7e7cd");
+      dust.appendChild(c);
+      dustPuffs.push({
+        el: c,
+        event,
+        dx: -20 + i * 20,
+        r: 5 + i * 2.5,
+        delay: i * 0.045
+      });
+    }
+  });
+
+  // ---------- per-frame render ----------
+  function render(t) {
+    const root = getRoot(t);
+    trex.setAttribute("transform", `translate(${root.x.toFixed(2)} ${root.y.toFixed(2)})`);
+
+    const nearTarget = getLegTarget("near", t, root);
+    const farTarget = getLegTarget("far", t, root);
+    placeLeg(legs.near, nearTarget);
+    placeLeg(legs.far, farTarget);
+
+    // tail and head keep the body alive between key poses.
+    const tailWave = Math.sin(t * 5.1) * 3.1 + (t > 3.5 && t < 5.1 ? Math.sin((t - 3.5) * 8.5) * 7 : 0);
+    const jumpAir = t > JUMP_START && t < JUMP_END ? -2.5 : 0;
+    tail.setAttribute("transform", `rotate(${(tailWave + jumpAir).toFixed(2)} -40 -12)`);
+
+    const headAngle = track(t, [
+      [0, 0], [0.9, 1.5], [1.55, 2.4], [2.15, -2], [2.55, -4],
+      [RELEASE_TIME, -5.5], [SCORE_TIME, -7], [3.55, -9], [4.05, -13],
+      [4.55, -9], [5.8, 0]
+    ]);
+    head.setAttribute("transform", `rotate(${(headAngle + (t > 3.6 && t < 4.6 ? Math.sin(t * 12) * 1.8 : 0)).toFixed(2)} 185 -225)`);
+
+    const jawAngle = track(t, [
+      [0, 0], [.9, .8], [1.8, 1.6], [2.15, 5], [2.6, 8],
+      [RELEASE_TIME, 8], [SCORE_TIME + .15, 14], [3.7, 13],
+      [4.15, 8], [5.8, 0]
+    ]);
+    jaw.setAttribute("transform", `rotate(${jawAngle.toFixed(2)} 208 -171)`);
+
+    const ribbon = 3 * Math.sin(t * 14) + (t > 2.15 && t < 3.6 ? -4 : 0);
+    headbandTails.setAttribute("transform", `rotate(${ribbon.toFixed(2)} 198 -245)`);
+
+    const ballState = getBallState(t, root);
+    const armTargets = getArms(t, root, ballState);
+    drawArm(arms.far, armTargets.far);
+    const stretchWiggle = t > 2.42 && t < 3.04 ? Math.sin(t * 57) * 4.2 : 0;
+    drawArm(arms.near, armTargets.near, stretchWiggle);
+
+    if (ballState.visible) {
+      ball.setAttribute("transform", `translate(${ballState.x.toFixed(2)} ${ballState.y.toFixed(2)}) rotate(${(ballState.spinT * 45).toFixed(1)})`);
+      ball.style.display = "";
+    } else {
+      ball.style.display = "none";
+    }
+    ballShadow.setAttribute("cx", ballState.x.toFixed(2));
+    ballShadow.setAttribute("cy", "650");
+    const ballHeight = clamp(650 - ballState.y, 0, 350);
+    ballShadow.setAttribute("rx", (22 + ballHeight * 0.018).toFixed(2));
+    ballShadow.setAttribute("ry", (7 + ballHeight * 0.006).toFixed(2));
+    ballShadow.setAttribute("opacity", (0.26 - ballHeight / 1600).toFixed(3));
+
+    // claws on top of the ball when held
+    if (ballState.held) {
+      gripClaws.setAttribute("opacity", ".95");
+      gripClaws.setAttribute("transform", `translate(${(ballState.x - 20).toFixed(1)} ${(ballState.y + 5).toFixed(1)}) rotate(-16)`);
+    } else {
+      gripClaws.setAttribute("opacity", "0");
+    }
+
+    // trail during the shot
+    if (t > RELEASE_TIME && t < SCORE_TIME) {
+      ballTrail.setAttribute("opacity", "1");
+      for (let i = 0; i < 3; i++) {
+        const tt = Math.max(RELEASE_TIME, t - 0.035 * (i + 1));
+        const bs = getBallState(tt, root);
+        const dot = trailDots[i];
+        dot.setAttribute("cx", bs.x.toFixed(2));
+        dot.setAttribute("cy", bs.y.toFixed(2));
+      }
+    } else {
+      ballTrail.setAttribute("opacity", "0");
+    }
+
+    // shadow and follow light
+    const airHeight = clamp(500 - root.y, 0, 120);
+    const shadowScale = 1 - airHeight / 300;
+    trexShadow.setAttribute("cx", (root.x + 22).toFixed(2));
+    trexShadow.setAttribute("rx", (158 * shadowScale).toFixed(2));
+    trexShadow.setAttribute("ry", (22 * shadowScale).toFixed(2));
+    trexShadow.setAttribute("opacity", (0.3 * shadowScale).toFixed(3));
+    followLight.setAttribute("cx", (root.x + 50).toFixed(2));
+
+    // net ripple
+    const sinceScore = t - SCORE_TIME;
+    if (sinceScore >= 0) {
+      const amp = Math.exp(-sinceScore * 6.2) * Math.sin(sinceScore * 21);
+      netMesh.setAttribute("transform", `scale(${(1 + 0.035 * amp).toFixed(3)} ${(1 + 0.2 * amp).toFixed(3)}) rotate(${(3.5 * amp).toFixed(2)})`);
+    } else {
+      netMesh.setAttribute("transform", "scale(1 1) rotate(0)");
+    }
+
+    // score footprints
+    for (let i = 0; i < 3; i++) {
+      const since = t - stepEvents[i];
+      const on = since >= 0;
+      const pop = on ? smooth(since / 0.18) : 0;
+      const fp = footprints[i];
+      fp.setAttribute("opacity", on ? (0.34 + 0.42 * pop).toFixed(3) : "0");
+      fp.setAttribute("transform",
+        `translate(${stepPositions[i] + 8} 660) rotate(-8) scale(${(0.72 + 0.28 * pop).toFixed(3)})`);
+    }
+
+    // dust puffs
+    dustPuffs.forEach((puff) => {
+      const since = t - puff.event.t - puff.delay;
+      if (since > 0 && since < 0.62) {
+        const u = since / 0.62;
+        puff.el.setAttribute("cx", (puff.event.x + puff.dx * u).toFixed(2));
+        puff.el.setAttribute("cy", (655 - u * 23).toFixed(2));
+        puff.el.setAttribute("r", (puff.r * (1 + u * 1.8)).toFixed(2));
+        puff.el.setAttribute("opacity", ((1 - u) * 0.38).toFixed(3));
+      } else {
+        puff.el.setAttribute("opacity", "0");
+      }
+    });
+
+    // confetti
+    confettiPieces.forEach((piece) => {
+      const since = t - SCORE_TIME - piece.delay;
+      if (since > 0 && since < 1.9) {
+        const x = piece.x0 + piece.vx * since;
+        const y = piece.y0 + piece.vy * since + 0.5 * 610 * since * since;
+        piece.el.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(piece.spin * since).toFixed(1)})`);
+        piece.el.setAttribute("opacity", (1 - since / 1.9).toFixed(3));
+      } else {
+        piece.el.setAttribute("opacity", "0");
+      }
+    });
+
+    // fade the whole action at loop boundaries
+    const fadeIn = smooth(t / 0.22);
+    const fadeOut = 1 - smooth((t - 5.12) / 0.55);
+    actLayer.setAttribute("opacity", (fadeIn * fadeOut).toFixed(3));
+
+    updateHUD(t);
+  }
+
+  // ---------- playback ----------
+  function syncControl() {
+    playback.classList.toggle("is-paused", paused);
+    playback.setAttribute("aria-label", paused ? "播放动画" : "暂停动画");
+    playback.title = paused ? "播放（空格）" : "暂停（空格）";
+    playbackLabel.textContent = paused ? "播放" : "暂停";
+    scene.classList.toggle("is-paused", paused);
+  }
+
+  function setPaused(next) {
+    paused = next;
+    lastFrame = performance.now();
+    syncControl();
+    if (paused) render(virtualTime % LOOP);
+  }
+
+  playback.addEventListener("click", () => setPaused(!paused));
+  window.addEventListener("keydown", (event) => {
+    if (event.code === "Space" && !event.repeat) {
+      event.preventDefault();
+      setPaused(!paused);
+    }
+  });
+  reduceMotion.addEventListener?.("change", (event) => {
+    if (event.matches) {
+      virtualTime = 2.72;
+      setPaused(true);
+    }
+  });
+
+  function tick(now) {
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    if (!paused) {
+      virtualTime += dt;
+      if (virtualTime >= LOOP) {
+        virtualTime %= LOOP;
+        lastScore = null;
+        lastPhase = null;
+        stepLit = [false, false, false];
+      }
+      render(virtualTime);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // debug hook useful for pausing on a specific story beat
+  window.__trexLayup = {
+    setTime(value) {
+      virtualTime = ((value % LOOP) + LOOP) % LOOP;
+      lastScore = null;
+      lastPhase = null;
+      stepLit = [false, false, false];
+      setPaused(true);
+      render(virtualTime);
+    },
+    play() { setPaused(false); },
+    pause() { setPaused(true); }
+  };
+
+  render(virtualTime);
+  syncControl();
+  requestAnimationFrame((now) => {
+    lastFrame = now;
+    requestAnimationFrame(tick);
+  });
+})();
+</script>
+</body>
+</html>

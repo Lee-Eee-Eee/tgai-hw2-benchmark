@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>霸王龙三步上篮 — 动画 SVG</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: rgba(30, 41, 59, 0.88);
+      --border: rgba(255, 255, 255, 0.11);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --accent-soft: rgba(249, 115, 22, 0.18);
+      --green: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, #090d16 78%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 4px;
+    }
+
+    .title-group h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .title-group p {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .phase-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .phase-pill {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .phase-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .phase-pill.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: #fed7aa;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.28);
+    }
+
+    .stage-card {
+      position: relative;
+      width: 100%;
+      background: #0b1120;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.5);
+    }
+
+    #scene {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--surface);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button.ctrl-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    button.ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    button.ctrl-btn:active {
+      transform: scale(0.97);
+    }
+
+    button.ctrl-btn.primary {
+      background: #ea580c;
+      border-color: #fb923c;
+      color: #ffffff;
+    }
+
+    button.ctrl-btn.primary:hover {
+      background: #c2410c;
+    }
+
+    button.ctrl-btn.active-mode {
+      background: rgba(249, 115, 22, 0.22);
+      border-color: #fb923c;
+      color: #ffedd5;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+
+    .slider-wrap span {
+      min-width: 34px;
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 104px;
+      accent-color: #f97316;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid rgba(249, 115, 22, 0.5);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 50;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 680px) {
+      .controls-bar {
+        justify-content: center;
+      }
+      .header-bar {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="header-bar">
+      <div class="title-group">
+        <h1>霸王龙 #65 · 三步上篮</h1>
+        <p>点击阶段标签可跳转拆解动作，点击画面暂停/继续</p>
+      </div>
+      <div class="phase-pills" id="phasePills">
+        <button class="phase-pill active" data-jump="0.02" type="button">1. 运球加速</button>
+        <button class="phase-pill" data-jump="0.25" type="button">2. 第一步·收球</button>
+        <button class="phase-pill" data-jump="0.44" type="button">3. 第二步·起跳</button>
+        <button class="phase-pill" data-jump="0.58" type="button">4. 腾空挑篮</button>
+        <button class="phase-pill" data-jump="0.77" type="button">5. 打板入网</button>
+      </div>
+    </div>
+
+    <div class="stage-card">
+      <svg id="scene" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="霸王龙三步上篮动画SVG">
+        <defs>
+          <!-- Arena Wall Gradients -->
+          <linearGradient id="bgArena" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f172a" />
+            <stop offset="60%" stop-color="#1e293b" />
+            <stop offset="100%" stop-color="#334155" />
+          </linearGradient>
+          <linearGradient id="bgSunset" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#312e81" />
+            <stop offset="48%" stop-color="#c026d3" />
+            <stop offset="82%" stop-color="#fb7185" />
+            <stop offset="100%" stop-color="#fde68a" />
+          </linearGradient>
+          <linearGradient id="bgNeon" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#020617" />
+            <stop offset="55%" stop-color="#0f172a" />
+            <stop offset="100%" stop-color="#1e1b4b" />
+          </linearGradient>
+
+          <!-- Hardwood Floor Gradients -->
+          <linearGradient id="floorArena" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#d97706" />
+            <stop offset="25%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#b45309" />
+          </linearGradient>
+          <linearGradient id="floorSunset" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#475569" />
+            <stop offset="100%" stop-color="#1e293b" />
+          </linearGradient>
+          <linearGradient id="floorNeon" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1e1b4b" />
+            <stop offset="100%" stop-color="#0f172a" />
+          </linearGradient>
+
+          <!-- Spotlight Cone -->
+          <linearGradient id="spotGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fef08a" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#fef08a" stop-opacity="0" />
+          </linearGradient>
+
+          <!-- T-Rex Gradients -->
+          <linearGradient id="rexSkin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4ade80" />
+            <stop offset="58%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#15803d" />
+          </linearGradient>
+          <linearGradient id="rexDarkSkin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#166534" />
+          </linearGradient>
+          <linearGradient id="rexBelly" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="100%" stop-color="#bef264" />
+          </linearGradient>
+          <linearGradient id="jerseyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ef4444" />
+            <stop offset="100%" stop-color="#b91c1c" />
+          </linearGradient>
+
+          <!-- Basketball Gradient -->
+          <radialGradient id="ballGrad" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#fdba74" />
+            <stop offset="45%" stop-color="#f97316" />
+            <stop offset="100%" stop-color="#9a3412" />
+          </radialGradient>
+
+          <!-- Glass Backboard -->
+          <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.52" />
+            <stop offset="100%" stop-color="#bae6fd" stop-opacity="0.2" />
+          </linearGradient>
+        </defs>
+
+        <!-- 1. ARENA / COURT BACKGROUND -->
+        <rect id="bgRect" x="0" y="0" width="960" height="390" fill="url(#bgArena)" />
+
+        <!-- Arena Spotlights -->
+        <g id="arenaLights">
+          <polygon points="180,0 60,390 310,390" fill="url(#spotGrad)" />
+          <polygon points="520,0 390,390 650,390" fill="url(#spotGrad)" />
+          <polygon points="810,0 690,390 930,390" fill="url(#spotGrad)" />
+          <rect x="155" y="0" width="50" height="10" rx="3" fill="#e2e8f0" />
+          <rect x="495" y="0" width="50" height="10" rx="3" fill="#e2e8f0" />
+          <rect x="785" y="0" width="50" height="10" rx="3" fill="#e2e8f0" />
+        </g>
+
+        <!-- Sunset Sun (shown in Sunset mode) -->
+        <circle id="sunsetSun" cx="220" cy="240" r="68" fill="#fde047" opacity="0" />
+
+        <!-- Bleachers & Crowd Silhouettes -->
+        <g id="bleachers" opacity="0.42">
+          <rect x="0" y="290" width="960" height="100" fill="#0f172a" />
+          <line x1="0" y1="318" x2="960" y2="318" stroke="#334155" stroke-width="2" />
+          <line x1="0" y1="348" x2="960" y2="348" stroke="#334155" stroke-width="2" />
+          <!-- Crowd heads -->
+          <g fill="#334155">
+            <circle cx="55" cy="308" r="9" /><circle cx="95" cy="310" r="8" /><circle cx="145" cy="306" r="9" />
+            <circle cx="210" cy="309" r="8" /><circle cx="265" cy="307" r="9" /><circle cx="330" cy="310" r="8" />
+            <circle cx="400" cy="306" r="9" /><circle cx="465" cy="309" r="8" /><circle cx="535" cy="307" r="9" />
+            <circle cx="605" cy="310" r="8" /><circle cx="670" cy="306" r="9" /><circle cx="725" cy="309" r="8" />
+            <circle cx="80" cy="338" r="9" /><circle cx="170" cy="336" r="9" /><circle cx="290" cy="339" r="8" />
+            <circle cx="370" cy="337" r="9" /><circle cx="495" cy="338" r="9" /><circle cx="635" cy="336" r="9" />
+          </g>
+        </g>
+
+        <!-- Hanging Scoreboard -->
+        <g transform="translate(372, 22)">
+          <rect x="0" y="0" width="216" height="60" rx="10" fill="#090d16" stroke="#475569" stroke-width="2.5" />
+          <text x="16" y="23" font-size="10.5" fill="#94a3b8" font-weight="700" letter-spacing="0.8">JURASSIC ARENA</text>
+          <text x="16" y="47" font-size="18" fill="#4ade80" font-weight="800">REX #65</text>
+          <rect x="148" y="13" width="54" height="34" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+          <text id="scoreText" x="175" y="37" text-anchor="middle" font-size="22" fill="#fb923c" font-weight="800" font-family="monospace">00</text>
+        </g>
+
+        <!-- 2. BASKETBALL COURT FLOOR -->
+        <rect id="floorRect" x="0" y="388" width="960" height="152" fill="url(#floorArena)" />
+        <!-- Wood plank perspective lines -->
+        <g id="courtLines" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2">
+          <line x1="0" y1="388" x2="960" y2="388" stroke-opacity="0.55" stroke-width="3" />
+          <line x1="0" y1="418" x2="960" y2="418" />
+          <line x1="0" y1="456" x2="960" y2="456" />
+          <line x1="0" y1="500" x2="960" y2="500" />
+        </g>
+        <!-- Paint Zone / Three-Point Line & Step Markers -->
+        <polygon id="paintZone" points="540,390 890,390 935,515 510,515" fill="#dc2626" opacity="0.24" stroke="#ffffff" stroke-width="3" stroke-opacity="0.6" />
+        <path d="M 355 390 Q 320 465 375 540" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.55" />
+
+        <!-- Step Footprint Markers on Court (Light up during Step 1 & Step 2!) -->
+        <g id="step1Marker" transform="translate(455, 456)" opacity="0.22">
+          <ellipse cx="0" cy="0" rx="28" ry="9" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-dasharray="5 3" />
+          <text x="0" y="24" text-anchor="middle" font-size="12" fill="#fef08a" font-weight="700">第一步</text>
+        </g>
+        <g id="step2Marker" transform="translate(595, 456)" opacity="0.22">
+          <ellipse cx="0" cy="0" rx="28" ry="9" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5 3" />
+          <text x="0" y="24" text-anchor="middle" font-size="12" fill="#fed7aa" font-weight="700">第二步·起跳</text>
+        </g>
+
+        <!-- 3. BASKETBALL HOOP (BACK LAYER) -->
+        <g id="hoopBack">
+          <!-- Stanchion Pole & Base -->
+          <path d="M 885 452 L 885 162 L 842 162" fill="none" stroke="#475569" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 885 190 L 842 162" stroke="#64748b" stroke-width="6" />
+          <!-- Padded Base -->
+          <rect x="866" y="345" width="38" height="114" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2" />
+          <rect x="866" y="370" width="38" height="22" fill="#dc2626" />
+          <!-- Backboard Glass -->
+          <rect x="826" y="102" width="14" height="122" rx="3" fill="url(#glassGrad)" stroke="#f8fafc" stroke-width="3" />
+          <!-- Shooter's Red Square (side perspective) -->
+          <rect x="826" y="152" width="8" height="44" fill="none" stroke="#ef4444" stroke-width="2.8" />
+          <!-- Backboard Impact Flash -->
+          <circle id="bankFlash" cx="826" cy="168" r="18" fill="#fef08a" opacity="0" />
+          <!-- Back Rim -->
+          <ellipse cx="788" cy="196" rx="36" ry="7" fill="none" stroke="#c2410c" stroke-width="5" />
+        </g>
+
+        <!-- 4. DYNAMIC SHADOWS & DUST PUFFS -->
+        <ellipse id="rexShadow" cx="150" cy="462" rx="64" ry="12" fill="#090d16" opacity="0.42" />
+        <ellipse id="ballShadow" cx="195" cy="462" rx="18" ry="5" fill="#090d16" opacity="0.35" />
+
+        <!-- Takeoff / Dribble Dust Puff -->
+        <g id="dustPuff" opacity="0" transform="translate(595, 456)">
+          <circle cx="-18" cy="2" r="9" fill="#fef3c7" opacity="0.7" />
+          <circle cx="0" cy="-3" r="12" fill="#ffffff" opacity="0.8" />
+          <circle cx="18" cy="2" r="8" fill="#fef3c7" opacity="0.7" />
+        </g>
+
+        <!-- Speed Lines (visible during sprint & jump) -->
+        <g id="speedLines" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round" opacity="0">
+          <line x1="0" y1="0" x2="-48" y2="0" />
+          <line x1="10" y1="22" x2="-62" y2="22" />
+          <line x1="-6" y1="44" x2="-40" y2="44" />
+        </g>
+
+        <!-- 5. T-REX CHARACTER GROUP -->
+        <g id="trexGroup" transform="translate(150, 340)">
+          <!-- Far Hind Leg (behind body) -->
+          <g id="farLeg">
+            <path id="farLegPath" d="M -8 24 L 8 68 L -4 114" fill="none" stroke="#15803d" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+            <g id="farShoe" transform="translate(-4, 114)">
+              <path d="M -14 0 L 24 0 C 30 0 32 8 28 12 L -16 12 Z" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" />
+              <rect x="-16" y="9" width="46" height="5" rx="2.5" fill="#e2e8f0" />
+            </g>
+          </g>
+
+          <!-- Far Tiny Arm -->
+          <g id="farArm" transform="translate(30, -14)">
+            <path d="M 0 0 L 22 6 L 34 -4" fill="none" stroke="#15803d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M 34 -4 L 40 -8 M 34 -4 L 40 0" stroke="#15803d" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Articulated Counterbalance Tail -->
+          <g id="rexTail">
+            <path id="tailBody" d="M -26 16 Q -88 10 -142 -12 Q -96 36 -26 42 Z" fill="url(#rexSkin)" stroke="#14532d" stroke-width="2.5" stroke-linejoin="round" />
+            <!-- Tail spikes -->
+            <path d="M -52 12 L -58 0 L -42 10 M -82 5 L -90 -8 L -72 4 M -110 -3 L -118 -14 L -100 -2" fill="#15803d" stroke="#14532d" stroke-width="1.5" stroke-linejoin="round" />
+          </g>
+
+          <!-- Torso + Jersey #65 -->
+          <g id="rexTorso">
+            <!-- Belly & Back -->
+            <path d="M -38 28 C -46 -18, -16 -52, 26 -48 C 52 -45, 58 -8, 42 26 C 28 52, -26 54, -38 28 Z"
+                  fill="url(#rexSkin)" stroke="#14532d" stroke-width="2.6" />
+            <!-- Belly Stripe -->
+            <path d="M 18 -38 C 40 -26, 46 4, 28 36 C 12 42, -4 38, 0 18 C 4 -4, 6 -24, 18 -38 Z"
+                  fill="url(#rexBelly)" opacity="0.85" />
+            <!-- Basketball Jersey -->
+            <path d="M -26 -24 C -10 -44, 26 -44, 38 -20 C 46 -2, 42 20, 32 32 L -28 32 C -36 16, -34 -6, -26 -24 Z"
+                  fill="url(#jerseyGrad)" stroke="#7f1d1d" stroke-width="2.2" stroke-linejoin="round" />
+            <!-- Jersey Trim -->
+            <path d="M -26 26 L 34 26" stroke="#fef08a" stroke-width="3" />
+            <text x="6" y="14" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff" stroke="#7f1d1d" stroke-width="0.8">65</text>
+            <!-- Shorts -->
+            <path d="M -28 30 L 32 30 L 36 52 L -32 52 Z" fill="#1e293b" stroke="#0f172a" stroke-width="2" />
+            <line x1="-28" y1="46" x2="34" y2="46" stroke="#ef4444" stroke-width="3" />
+          </g>
+
+          <!-- Head & Articulated Jaw -->
+          <g id="rexHead" transform="translate(32, -56)">
+            <!-- Neck -->
+            <path d="M -18 22 C -14 2, -6 -14, 12 -18 L 28 12 C 14 22, 0 28, -18 22 Z" fill="url(#rexSkin)" stroke="#14532d" stroke-width="2.4" />
+            <!-- Lower Jaw (opens for roar!) -->
+            <g id="rexJaw" transform="translate(14, 4)">
+              <path d="M 0 0 L 46 2 C 50 10, 42 18, 26 18 L 0 14 Z" fill="#22c55e" stroke="#14532d" stroke-width="2.4" stroke-linejoin="round" />
+              <!-- Lower teeth -->
+              <polygon points="14,1 18,-5 22,1" fill="#ffffff" />
+              <polygon points="28,1 32,-5 36,1" fill="#ffffff" />
+            </g>
+            <!-- Upper Skull & Snout -->
+            <path d="M -8 -10 C -10 -34, 14 -44, 38 -36 C 54 -30, 68 -24, 72 -10 C 74 0, 66 6, 52 6 L 12 6 C -2 6, -8 0, -8 -10 Z"
+                  fill="url(#rexSkin)" stroke="#14532d" stroke-width="2.5" stroke-linejoin="round" />
+            <!-- Upper Teeth -->
+            <polygon points="24,6 28,13 32,6" fill="#ffffff" />
+            <polygon points="38,6 42,13 46,6" fill="#ffffff" />
+            <polygon points="52,6 56,12 60,6" fill="#ffffff" />
+            <!-- Nostril -->
+            <ellipse cx="60" cy="-16" rx="3" ry="2" fill="#14532d" />
+            <!-- Determined Eye -->
+            <circle cx="24" cy="-18" r="8.5" fill="#fef08a" stroke="#14532d" stroke-width="1.8" />
+            <circle cx="26.5" cy="-18" r="4.2" fill="#0f172a" />
+            <circle cx="28" cy="-19.5" r="1.5" fill="#ffffff" />
+            <!-- Fierce Eyebrow -->
+            <path d="M 14 -28 L 35 -23" stroke="#14532d" stroke-width="3.5" stroke-linecap="round" />
+            <!-- Red Sports Headband & Fluttering Tails -->
+            <path d="M -6 -24 Q 18 -34 40 -27 L 38 -19 Q 16 -26 -8 -16 Z" fill="#ef4444" stroke="#991b1b" stroke-width="1.5" />
+            <path id="bandTail1" d="M -7 -20 Q -26 -26 -42 -16" fill="none" stroke="#ef4444" stroke-width="5.5" stroke-linecap="round" />
+            <path id="bandTail2" d="M -7 -18 Q -24 -12 -38 -6" fill="none" stroke="#dc2626" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Near Hind Leg (front) -->
+          <g id="nearLeg">
+            <path id="nearLegPath" d="M 2 28 L 22 72 L 10 116" fill="none" stroke="#22c55e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+            <path id="nearLegOutline" d="M 2 28 L 22 72 L 10 116" fill="none" stroke="#14532d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
+            <g id="nearShoe" transform="translate(10, 116)">
+              <path d="M -15 0 L 26 0 C 33 0 35 8 30 13 L -17 13 Z" fill="#ef4444" stroke="#7f1d1d" stroke-width="2" />
+              <!-- White sneaker sole & stripe -->
+              <rect x="-17" y="10" width="49" height="5.5" rx="2.5" fill="#ffffff" stroke="#94a3b8" stroke-width="0.8" />
+              <path d="M 0 3 L 12 8 M 6 2 L 16 7" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <!-- Near Tiny T-Rex Arm (reaches for the sky on layup!) -->
+          <g id="nearArm" transform="translate(22, -6)">
+            <path d="M 0 0 L 22 8 L 36 -4" fill="none" stroke="#22c55e" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M 36 -4 L 43 -9 M 36 -4 L 43 0" stroke="#15803d" stroke-width="3.8" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- 6. BASKETBALL -->
+        <g id="basketball" transform="translate(195, 360)">
+          <g id="ballSpin">
+            <circle cx="0" cy="0" r="19" fill="url(#ballGrad)" stroke="#7c2d12" stroke-width="2" />
+            <!-- Seams -->
+            <path d="M -19 0 L 19 0 M 0 -19 L 0 19" stroke="#431407" stroke-width="1.6" />
+            <path d="M -13 -13 Q -2 0 -13 13 M 13 -13 Q 2 0 13 13" fill="none" stroke="#431407" stroke-width="1.6" />
+          </g>
+        </g>
+
+        <!-- 7. BASKETBALL HOOP (FRONT LAYER: FRONT RIM & ANIMATED NET) -->
+        <g id="hoopFront">
+          <!-- Animated Net -->
+          <g id="netGroup" transform="translate(788, 198)" stroke="#f8fafc" stroke-width="2.2" stroke-linecap="round" fill="none">
+            <path id="netPath1" d="M -33 0 L -20 48 M -18 2 L -10 52 M 0 3 L 0 54 M 18 2 L 10 52 M 33 0 L 20 48" />
+            <path id="netPath2" d="M -30 12 L -10 26 L 10 12 L 28 26 M -26 28 L -8 42 L 10 28 L 24 42 M -20 46 L 0 36 L 20 46" />
+          </g>
+          <!-- Front Rim Arc -->
+          <path d="M 752 196 A 36 7 0 0 0 824 196" fill="none" stroke="#f97316" stroke-width="5.5" stroke-linecap="round" />
+          <!-- Rim bracket -->
+          <rect x="816" y="191" width="12" height="10" rx="2" fill="#ea580c" />
+        </g>
+
+        <!-- 8. SCORE POPUP (+2 SWISH!) -->
+        <g id="scorePopup" transform="translate(788, 150)" opacity="0">
+          <text x="0" y="0" text-anchor="middle" font-size="30" font-weight="900" fill="#fef08a" stroke="#ea580c" stroke-width="1.5">+2!</text>
+          <text x="0" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#4ade80">空心入网!</text>
+        </g>
+
+        <!-- On-stage Phase Caption -->
+        <g transform="translate(22, 24)">
+          <rect x="0" y="0" width="176" height="34" rx="17" fill="#090d16" fill-opacity="0.72" stroke="#f97316" stroke-opacity="0.55" stroke-width="1.5" />
+          <text id="stageCaption" x="88" y="22" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffedd5">运球加速推进</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="controls-bar">
+      <div class="control-group">
+        <button id="playPauseBtn" class="ctrl-btn primary" type="button">暂停</button>
+        <button id="replayBtn" class="ctrl-btn" type="button">重播</button>
+        <button id="soundBtn" class="ctrl-btn" type="button">音效: 开</button>
+        <div class="slider-wrap">
+          <label for="speedSlider">速度</label>
+          <input id="speedSlider" type="range" min="0.3" max="1.8" step="0.1" value="1.0" />
+          <span id="speedVal">1.0x</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <button id="modeArena" class="ctrl-btn active-mode" type="button">室内球馆</button>
+        <button id="modeSunset" class="ctrl-btn" type="button">日落街球</button>
+        <button id="modeNeon" class="ctrl-btn" type="button">霓虹夜场</button>
+        <button id="saveSvgBtn" class="ctrl-btn" type="button">保存 SVG</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const svg = document.getElementById('scene');
+      const trexGroup = document.getElementById('trexGroup');
+      const rexHead = document.getElementById('rexHead');
+      const rexJaw = document.getElementById('rexJaw');
+      const rexTail = document.getElementById('rexTail');
+      const nearArm = document.getElementById('nearArm');
+      const farArm = document.getElementById('farArm');
+      const nearLegPath = document.getElementById('nearLegPath');
+      const nearLegOutline = document.getElementById('nearLegOutline');
+      const nearShoe = document.getElementById('nearShoe');
+      const farLegPath = document.getElementById('farLegPath');
+      const farShoe = document.getElementById('farShoe');
+      const bandTail1 = document.getElementById('bandTail1');
+      const bandTail2 = document.getElementById('bandTail2');
+
+      const basketball = document.getElementById('basketball');
+      const ballSpin = document.getElementById('ballSpin');
+      const rexShadow = document.getElementById('rexShadow');
+      const ballShadow = document.getElementById('ballShadow');
+      const dustPuff = document.getElementById('dustPuff');
+      const speedLines = document.getElementById('speedLines');
+      const bankFlash = document.getElementById('bankFlash');
+      const netGroup = document.getElementById('netGroup');
+      const scorePopup = document.getElementById('scorePopup');
+      const scoreText = document.getElementById('scoreText');
+      const stageCaption = document.getElementById('stageCaption');
+      const step1Marker = document.getElementById('step1Marker');
+      const step2Marker = document.getElementById('step2Marker');
+
+      // Theme nodes
+      const bgRect = document.getElementById('bgRect');
+      const floorRect = document.getElementById('floorRect');
+      const arenaLights = document.getElementById('arenaLights');
+      const sunsetSun = document.getElementById('sunsetSun');
+      const bleachers = document.getElementById('bleachers');
+      const paintZone = document.getElementById('paintZone');
+
+      // Controls
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const replayBtn = document.getElementById('replayBtn');
+      const soundBtn = document.getElementById('soundBtn');
+      const speedSlider = document.getElementById('speedSlider');
+      const speedVal = document.getElementById('speedVal');
+      const modeArena = document.getElementById('modeArena');
+      const modeSunset = document.getElementById('modeSunset');
+      const modeNeon = document.getElementById('modeNeon');
+      const saveSvgBtn = document.getElementById('saveSvgBtn');
+      const phasePills = Array.from(document.querySelectorAll('.phase-pill'));
+      const toast = document.getElementById('toast');
+
+      // State
+      const CYCLE_SEC = 4.6;
+      let progress = 0; // 0..1
+      let isPlaying = true;
+      let speed = 1.0;
+      let soundOn = true;
+      let score = 0;
+      let lastTs = null;
+      let ballAngle = 0;
+      let audioCtx = null;
+
+      // Event triggers per cycle
+      let firedDribble = false;
+      let firedTakeoff = false;
+      let firedBank = false;
+      let firedSwish = false;
+
+      function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - clamp(t, 0, 1), 3);
+      }
+
+      function easeInOutQuad(t) {
+        t = clamp(t, 0, 1);
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function ensureAudio() {
+        if (!soundOn) return null;
+        try {
+          if (!audioCtx) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            audioCtx = new Ctx();
+          }
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          return audioCtx;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function playSound(type) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        try {
+          if (type === 'dribble' || type === 'bank') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(type === 'dribble' ? 145 : 230, now);
+            osc.frequency.exponentialRampToValueAtTime(55, now + 0.11);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.13);
+          } else if (type === 'squeak') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1650, now);
+            osc.frequency.exponentialRampToValueAtTime(2200, now + 0.09);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+          } else if (type === 'swish') {
+            // Pleasant swish chime
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + i * 0.045);
+              gain.gain.setValueAtTime(0.001, now + i * 0.045);
+              gain.gain.exponentialRampToValueAtTime(0.09, now + i * 0.045 + 0.015);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.045 + 0.34);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + i * 0.045);
+              osc.stop(now + i * 0.045 + 0.36);
+            });
+          }
+        } catch (e) {
+          // Optional audio
+        }
+      }
+
+      function resetCycleFlags() {
+        firedDribble = false;
+        firedTakeoff = false;
+        firedBank = false;
+        firedSwish = false;
+      }
+
+      // 2-bone IK for T-Rex hind legs (local coordinates relative to trexGroup)
+      function setLegPose(pathEl, outlineEl, shoeEl, hipX, hipY, footX, footY, shoeRot) {
+        const dx = footX - hipX;
+        const dy = footY - hipY;
+        const L1 = 52;
+        const L2 = 52;
+        const dist = Math.min(Math.hypot(dx, dy), L1 + L2 - 1);
+        const base = Math.atan2(dy, dx);
+        const cosA = clamp((L1 * L1 + dist * dist - L2 * L2) / (2 * L1 * dist), -1, 1);
+        const angleA = Math.acos(cosA);
+        const kneeAngle = base - angleA;
+        const kx = hipX + Math.cos(kneeAngle) * L1;
+        const ky = hipY + Math.sin(kneeAngle) * L1;
+        const d = `M ${hipX.toFixed(1)} ${hipY.toFixed(1)} L ${kx.toFixed(1)} ${ky.toFixed(1)} L ${footX.toFixed(1)} ${footY.toFixed(1)}`;
+        pathEl.setAttribute('d', d);
+        if (outlineEl) outlineEl.setAttribute('d', d);
+        shoeEl.setAttribute('transform', `translate(${footX.toFixed(1)}, ${footY.toFixed(1)}) rotate(${shoeRot.toFixed(1)})`);
+      }
+
+      function setTheme(mode) {
+        [modeArena, modeSunset, modeNeon].forEach(b => b.classList.remove('active-mode'));
+        if (mode === 'arena') {
+          modeArena.classList.add('active-mode');
+          bgRect.setAttribute('fill', 'url(#bgArena)');
+          floorRect.setAttribute('fill', 'url(#floorArena)');
+          arenaLights.setAttribute('opacity', '1');
+          sunsetSun.setAttribute('opacity', '0');
+          bleachers.setAttribute('opacity', '0.42');
+          paintZone.setAttribute('fill', '#dc2626');
+        } else if (mode === 'sunset') {
+          modeSunset.classList.add('active-mode');
+          bgRect.setAttribute('fill', 'url(#bgSunset)');
+          floorRect.setAttribute('fill', 'url(#floorSunset)');
+          arenaLights.setAttribute('opacity', '0.18');
+          sunsetSun.setAttribute('opacity', '0.88');
+          bleachers.setAttribute('opacity', '0.16');
+          paintZone.setAttribute('fill', '#f97316');
+        } else {
+          modeNeon.classList.add('active-mode');
+          bgRect.setAttribute('fill', 'url(#bgNeon)');
+          floorRect.setAttribute('fill', 'url(#floorNeon)');
+          arenaLights.setAttribute('opacity', '0.55');
+          sunsetSun.setAttribute('opacity', '0');
+          bleachers.setAttribute('opacity', '0.28');
+          paintZone.setAttribute('fill', '#06b6d4');
+        }
+      }
+
+      function updatePhaseUI(idx, caption) {
+        stageCaption.textContent = caption;
+        phasePills.forEach((pill, i) => {
+          pill.classList.toggle('active', i === idx);
+        });
+      }
+
+      function renderFrame(p, dt) {
+        // Phases across p in [0, 1]:
+        // [0.00 - 0.24]: Dribble approach (x: 115 -> 335)
+        // [0.24 - 0.42]: Step 1 - Gather & big right stride (x: 335 -> 465)
+        // [0.42 - 0.56]: Step 2 - Plant left foot & launch (x: 465 -> 595)
+        // [0.56 - 0.76]: Airborne finger-roll layup (x: 595 -> 712, y rises -148px!)
+        // [0.76 - 0.90]: Ball banks off backboard & swishes net; T-Rex lands smoothly (x: 712 -> 735)
+        // [0.90 - 1.00]: Victory roar & brief hold before loop
+
+        let rexX = 115;
+        let rexY = 334;
+        let bodyTilt = 10;
+        let jawOpen = 0;
+        let nearArmRot = 0;
+        let farArmRot = 0;
+
+        // Local foot targets (relative to trexGroup origin)
+        let nFootX = 12, nFootY = 116, nShoeRot = 0;
+        let fFootX = -10, fFootY = 116, fShoeRot = 0;
+
+        let ballX = 175, ballY = 350;
+        let dustOpacity = 0, dustX = 595, dustScale = 1;
+        let speedLineOpacity = 0;
+        let flashOpacity = 0;
+        let netScaleX = 1, netScaleY = 1, netSkew = 0;
+        let popupOpacity = 0, popupY = 150;
+
+        if (p < 0.24) {
+          // 1. Dribble Approach
+          const t = p / 0.24;
+          updatePhaseUI(0, '1. 运球加速推进');
+          step1Marker.setAttribute('opacity', '0.25');
+          step2Marker.setAttribute('opacity', '0.22');
+
+          rexX = lerp(115, 335, t);
+          rexY = 334 - Math.abs(Math.sin(t * Math.PI * 2)) * 10;
+          bodyTilt = 13;
+
+          const runCycle = t * Math.PI * 2.2;
+          nFootX = Math.sin(runCycle) * 34;
+          nFootY = 115 - Math.max(0, Math.cos(runCycle)) * 22;
+          nShoeRot = Math.sin(runCycle) * 14;
+          fFootX = Math.sin(runCycle + Math.PI) * 34;
+          fFootY = 115 - Math.max(0, Math.cos(runCycle + Math.PI)) * 22;
+          fShoeRot = Math.sin(runCycle + Math.PI) * 14;
+
+          // Dribble bounce
+          const bouncePhase = (t * 1.65) % 1;
+          const bounceH = Math.abs(Math.sin(bouncePhase * Math.PI));
+          ballX = rexX + 66;
+          ballY = lerp(444, 342, bounceH);
+          nearArmRot = lerp(34, 6, bounceH);
+          farArmRot = 12;
+          speedLineOpacity = 0.55;
+
+          if (t > 0.55 && !firedDribble) {
+            firedDribble = true;
+            playSound('dribble');
+          }
+        } else if (p < 0.42) {
+          // 2. Step 1: Big Right Stride & Gather Ball
+          const t = (p - 0.24) / 0.18;
+          updatePhaseUI(1, '2. 第一步 · 迈步收球');
+          step1Marker.setAttribute('opacity', '0.95');
+          step2Marker.setAttribute('opacity', '0.3');
+
+          rexX = lerp(335, 465, easeInOutQuad(t));
+          rexY = 334 - Math.sin(t * Math.PI) * 14 + (t > 0.7 ? (t - 0.7) * 18 : 0);
+          bodyTilt = lerp(13, 18, t);
+
+          // Big right (near) stride forward onto Step 1 marker
+          nFootX = lerp(-24, 34, easeOutCubic(t));
+          nFootY = 116 - Math.sin(t * Math.PI) * 20;
+          nShoeRot = lerp(-15, 6, t);
+          fFootX = lerp(24, -38, t);
+          fFootY = 116 - Math.sin(t * Math.PI) * 10;
+          fShoeRot = -18;
+
+          // Gather ball into tiny arms!
+          ballX = rexX + lerp(68, 66, t);
+          ballY = rexY + lerp(18, -8, easeOutCubic(t));
+          nearArmRot = lerp(18, -26, t);
+          farArmRot = lerp(12, -24, t);
+          speedLineOpacity = 0.7;
+        } else if (p < 0.56) {
+          // 3. Step 2: Plant Left Foot & Explode Upward
+          const t = (p - 0.42) / 0.14;
+          updatePhaseUI(2, '3. 第二步 · 踏跳起飞');
+          step1Marker.setAttribute('opacity', '0.35');
+          step2Marker.setAttribute('opacity', '1');
+
+          rexX = lerp(465, 595, easeInOutQuad(t));
+          // Dip down to load springs, then launch!
+          const crouch = Math.sin(t * Math.PI) * 16;
+          rexY = 334 + crouch;
+          bodyTilt = lerp(18, 8, t);
+
+          // Far (left) foot plants hard on Step 2; near (right) knee starts driving up!
+          fFootX = lerp(-34, 18, easeOutCubic(t));
+          fFootY = 116 - crouch * 0.7;
+          fShoeRot = 4;
+          nFootX = lerp(30, 12, t);
+          nFootY = lerp(116, 84, easeOutCubic(t));
+          nShoeRot = 24;
+
+          ballX = rexX + 68;
+          ballY = rexY - lerp(8, 22, t);
+          nearArmRot = lerp(-26, -48, t);
+          farArmRot = lerp(-24, -40, t);
+          speedLineOpacity = 0.75;
+
+          if (t > 0.65) {
+            dustOpacity = (1 - t) * 2.4;
+            dustX = 595;
+            dustScale = 0.7 + (t - 0.65) * 2.2;
+          }
+          if (t > 0.72 && !firedTakeoff) {
+            firedTakeoff = true;
+            playSound('squeak');
+          }
+        } else if (p < 0.76) {
+          // 4. Airborne Finger-Roll Layup!
+          const t = (p - 0.56) / 0.20;
+          updatePhaseUI(3, '4. 腾空挑篮出手');
+          step1Marker.setAttribute('opacity', '0.22');
+          step2Marker.setAttribute('opacity', '0.45');
+
+          rexX = lerp(595, 710, easeOutCubic(t));
+          const jumpArc = Math.sin(t * Math.PI * 0.85);
+          rexY = 334 - jumpArc * 138;
+          bodyTilt = lerp(8, -14, easeOutCubic(t));
+          jawOpen = lerp(0, 12, t); // intense game face!
+
+          // Classic layup form: right knee driven high, left leg extended down!
+          nFootX = 34;
+          nFootY = 66;
+          nShoeRot = 36;
+          fFootX = -22;
+          fFootY = 118;
+          fShoeRot = 28;
+
+          // Tiny arms reach all the way up!
+          nearArmRot = lerp(-48, -82, easeOutCubic(t));
+          farArmRot = lerp(-40, -64, easeOutCubic(t));
+
+          // Ball releases at t = 0.45 toward the backboard red square (820, 168)
+          if (t < 0.45) {
+            const rt = t / 0.45;
+            ballX = rexX + lerp(68, 72, rt);
+            ballY = rexY - lerp(22, 48, rt);
+          } else {
+            const ft = (t - 0.45) / 0.55;
+            const startX = 656 + 72;
+            const startY = (334 - Math.sin(0.45 * Math.PI * 0.85) * 138) - 48;
+            ballX = lerp(startX, 816, ft);
+            ballY = lerp(startY, 168, ft) - Math.sin(ft * Math.PI) * 44;
+          }
+          speedLineOpacity = (1 - t) * 0.65;
+        } else if (p < 0.90) {
+          // 5. Bank Shot off Backboard & Swish Through Net + Landing!
+          const t = (p - 0.76) / 0.14;
+          updatePhaseUI(4, '5. 打板空心入网!');
+          step1Marker.setAttribute('opacity', '0.2');
+          step2Marker.setAttribute('opacity', '0.2');
+
+          if (!firedBank) {
+            firedBank = true;
+            playSound('bank');
+          }
+
+          // Backboard flash right at start of phase
+          flashOpacity = t < 0.28 ? (1 - t / 0.28) * 0.9 : 0;
+
+          // Ball drops from backboard (816,168) -> rim center (788,196) -> straight through net -> floor bounce
+          if (t < 0.35) {
+            const bt = t / 0.35;
+            ballX = lerp(816, 788, bt);
+            ballY = lerp(168, 196, bt * bt);
+          } else {
+            if (!firedSwish) {
+              firedSwish = true;
+              score += 2;
+              scoreText.textContent = String(score).padStart(2, '0');
+              playSound('swish');
+            }
+            const dt2 = (t - 0.35) / 0.65;
+            ballX = 788 - dt2 * 8;
+            ballY = lerp(196, 444, easeInOutQuad(dt2));
+
+            // Net swish physics!
+            const swish = Math.sin(dt2 * Math.PI * 3) * (1 - dt2);
+            netScaleX = 1 + Math.abs(swish) * 0.24;
+            netScaleY = 1 + swish * 0.14;
+            netSkew = swish * 14;
+
+            // +2 popup floats up!
+            popupOpacity = Math.min(1, dt2 * 2.5) * (1 - Math.max(0, dt2 - 0.65) * 2.5);
+            popupY = 152 - dt2 * 44;
+          }
+
+          // T-Rex lands gracefully
+          const landT = easeOutCubic(Math.min(1, t * 1.45));
+          rexX = lerp(710, 732, landT);
+          rexY = lerp(334 - Math.sin(0.85 * Math.PI) * 138, 334, landT);
+          bodyTilt = lerp(-14, 6, landT);
+          jawOpen = lerp(12, 24, t); // Triumph roar!
+          nearArmRot = lerp(-82, -32, landT);
+          farArmRot = lerp(-64, -22, landT);
+
+          nFootX = lerp(34, 18, landT);
+          nFootY = lerp(66, 116, landT);
+          nShoeRot = lerp(36, 0, landT);
+          fFootX = lerp(-22, -16, landT);
+          fFootY = 116;
+          fShoeRot = lerp(28, 0, landT);
+
+          if (t > 0.55 && t < 0.85) {
+            dustOpacity = (0.85 - t) * 2.4;
+            dustX = 732;
+            dustScale = 1.1;
+          }
+        } else {
+          // 6. Victory Roar & Quick Reset
+          const t = (p - 0.90) / 0.10;
+          updatePhaseUI(4, '5. 霸王龙得分庆祝!');
+          rexX = 732;
+          rexY = 334 - Math.sin(t * Math.PI * 2) * 6;
+          bodyTilt = -4;
+          jawOpen = 24 * Math.sin(t * Math.PI);
+          nearArmRot = -36 - Math.sin(t * Math.PI * 4) * 12;
+          farArmRot = -26 - Math.sin(t * Math.PI * 4) * 10;
+
+          nFootX = 18; nFootY = 116; nShoeRot = 0;
+          fFootX = -16; fFootY = 116; fShoeRot = 0;
+
+          // Ball settles on court
+          ballX = 780 - t * 24;
+          ballY = 444 - Math.abs(Math.sin(t * Math.PI * 1.5)) * 28;
+        }
+
+        // Apply T-Rex transforms
+        trexGroup.setAttribute('transform', `translate(${rexX.toFixed(1)}, ${rexY.toFixed(1)}) rotate(${bodyTilt.toFixed(1)})`);
+        rexHead.setAttribute('transform', `translate(32, -56) rotate(${(-bodyTilt * 0.55).toFixed(1)})`);
+        rexJaw.setAttribute('transform', `translate(14, 4) rotate(${jawOpen.toFixed(1)})`);
+
+        const tailWag = Math.sin(p * Math.PI * 10) * 6;
+        rexTail.setAttribute('transform', `rotate(${tailWag.toFixed(1)}, -26, 26)`);
+
+        nearArm.setAttribute('transform', `translate(22, -6) rotate(${nearArmRot.toFixed(1)})`);
+        farArm.setAttribute('transform', `translate(30, -14) rotate(${farArmRot.toFixed(1)})`);
+
+        // Headband flutter
+        const bw = Math.sin(p * Math.PI * 18) * 6;
+        bandTail1.setAttribute('d', `M -7 -20 Q -26 ${(-26 + bw).toFixed(1)} -42 ${(-16 - bw * 0.6).toFixed(1)}`);
+        bandTail2.setAttribute('d', `M -7 -18 Q -24 ${(-12 - bw).toFixed(1)} -38 ${(-6 + bw * 0.5).toFixed(1)}`);
+
+        // Legs IK
+        setLegPose(nearLegPath, nearLegOutline, nearShoe, 4, 34, nFootX, nFootY, nShoeRot);
+        setLegPose(farLegPath, null, farShoe, -8, 32, fFootX, fFootY, fShoeRot);
+
+        // Basketball & spin
+        if (isPlaying) {
+          ballAngle = (ballAngle + dt * speed * 420) % 360;
+        }
+        basketball.setAttribute('transform', `translate(${ballX.toFixed(1)}, ${ballY.toFixed(1)})`);
+        ballSpin.setAttribute('transform', `rotate(${ballAngle.toFixed(1)})`);
+
+        // Shadows scale with height
+        const rexHeight = Math.max(0, 334 - rexY);
+        const shadowScale = clamp(1 - rexHeight / 280, 0.42, 1);
+        rexShadow.setAttribute('cx', rexX.toFixed(1));
+        rexShadow.setAttribute('rx', (64 * shadowScale).toFixed(1));
+        rexShadow.setAttribute('opacity', (0.42 * shadowScale).toFixed(2));
+
+        const ballH = Math.max(0, 444 - ballY);
+        const bShadowScale = clamp(1 - ballH / 360, 0.28, 1);
+        ballShadow.setAttribute('cx', ballX.toFixed(1));
+        ballShadow.setAttribute('rx', (19 * bShadowScale).toFixed(1));
+        ballShadow.setAttribute('opacity', (0.36 * bShadowScale).toFixed(2));
+
+        // FX layers
+        dustPuff.setAttribute('opacity', clamp(dustOpacity, 0, 1).toFixed(2));
+        dustPuff.setAttribute('transform', `translate(${dustX.toFixed(1)}, 458) scale(${dustScale.toFixed(2)})`);
+
+        speedLines.setAttribute('opacity', speedLineOpacity.toFixed(2));
+        speedLines.setAttribute('transform', `translate(${(rexX - 96).toFixed(1)}, ${(rexY - 12).toFixed(1)})`);
+
+        bankFlash.setAttribute('opacity', flashOpacity.toFixed(2));
+        netGroup.setAttribute('transform', `translate(788, 198) skewX(${netSkew.toFixed(1)}) scale(${netScaleX.toFixed(2)}, ${netScaleY.toFixed(2)})`);
+
+        scorePopup.setAttribute('opacity', clamp(popupOpacity, 0, 1).toFixed(2));
+        scorePopup.setAttribute('transform', `translate(788, ${popupY.toFixed(1)})`);
+      }
+
+      function loop(ts) {
+        if (lastTs === null) lastTs = ts;
+        const dt = Math.min(0.05, (ts - lastTs) / 1000);
+        lastTs = ts;
+
+        if (isPlaying) {
+          progress += (dt * speed) / CYCLE_SEC;
+          if (progress >= 1) {
+            progress -= 1;
+            resetCycleFlags();
+          }
+        }
+        renderFrame(progress, dt);
+        requestAnimationFrame(loop);
+      }
+
+      // Event Listeners
+      function togglePlay() {
+        isPlaying = !isPlaying;
+        playPauseBtn.textContent = isPlaying ? '暂停' : '播放';
+      }
+
+      playPauseBtn.addEventListener('click', togglePlay);
+      svg.addEventListener('click', togglePlay);
+
+      replayBtn.addEventListener('click', () => {
+        progress = 0;
+        resetCycleFlags();
+        isPlaying = true;
+        playPauseBtn.textContent = '暂停';
+      });
+
+      soundBtn.addEventListener('click', () => {
+        soundOn = !soundOn;
+        soundBtn.textContent = soundOn ? '音效: 开' : '音效: 关';
+        if (soundOn) ensureAudio();
+      });
+
+      speedSlider.addEventListener('input', () => {
+        speed = parseFloat(speedSlider.value);
+        speedVal.textContent = speed.toFixed(1) + 'x';
+      });
+
+      phasePills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          const jump = parseFloat(pill.getAttribute('data-jump'));
+          progress = jump;
+          resetCycleFlags();
+          if (jump >= 0.25) firedDribble = true;
+          if (jump >= 0.56) firedTakeoff = true;
+          if (jump >= 0.77) firedBank = false;
+          renderFrame(progress, 0.016);
+        });
+      });
+
+      modeArena.addEventListener('click', () => setTheme('arena'));
+      modeSunset.addEventListener('click', () => setTheme('sunset'));
+      modeNeon.addEventListener('click', () => setTheme('neon'));
+
+      saveSvgBtn.addEventListener('click', () => {
+        try {
+          const serializer = new XMLSerializer();
+          const svgStr = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(svg);
+          const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'trex-layup.svg';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showToast('已保存当前帧 trex-layup.svg');
+        } catch (e) {
+          showToast('当前环境不支持直接下载 SVG');
+        }
+      });
+
+      renderFrame(0.58, 0.016); // Initial crisp render check pose before animation starts
+      progress = 0;
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>

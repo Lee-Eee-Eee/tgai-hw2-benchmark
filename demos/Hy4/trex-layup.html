@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>霸王龙三步上篮 · T-Rex Three-Step Layup</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 26px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% -10%, #2b3a52 0%, #141d2b 55%, #0c1119 100%);
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  }
+  .stage { width: min(1000px, 100%); }
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 28px 70px rgba(0,0,0,.5), 0 2px 0 rgba(255,255,255,.08) inset;
+  }
+  svg#scene { display: block; width: 100%; height: auto; }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 22px;
+    background: linear-gradient(#fbfcfd, #f1f5f8);
+    border-top: 1px solid #e3e9ee;
+  }
+  .bar h1 { margin: 0; font-size: 17px; color: #243447; }
+  .bar p  { margin: 3px 0 0; font-size: 12.5px; color: #7d8b99; }
+  .bar .phase {
+    font-size: 12.5px; font-weight: 700; color: #d3542f;
+    white-space: nowrap; min-width: 130px; text-align: center;
+  }
+  button {
+    flex: none; border: 0; cursor: pointer;
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; color: #fff;
+    background: #e8524a; box-shadow: 0 4px 12px rgba(232,82,74,.35);
+    transition: transform .15s ease, background .15s ease;
+  }
+  button:hover { transform: translateY(-1px); background: #d8443d; }
+  button:active { transform: translateY(1px); }
+  #lights { animation: flicker 5.5s ease-in-out infinite; }
+  @keyframes flicker { 0%,100% { opacity: .42; } 50% { opacity: .62; } }
+  body.paused #lights { animation-play-state: paused; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="card">
+    <svg id="scene" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-labelledby="svgTitle svgDesc"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+      <title id="svgTitle">霸王龙三步上篮</title>
+      <desc id="svgDesc">A cartoon Tyrannosaurus rex in a number 23 jersey dribbles forward in three steps, gathers the ball, leaps and banks a layup off the backboard into the hoop. The net swishes and the score pops.</desc>
+
+      <defs>
+        <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#13253c"/>
+          <stop offset=".6"  stop-color="#244567"/>
+          <stop offset="1"   stop-color="#315a7c"/>
+        </linearGradient>
+        <radialGradient id="lightGlow">
+          <stop offset="0"   stop-color="#ffffff" stop-opacity=".45"/>
+          <stop offset="1"   stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#a97036"/>
+          <stop offset="1" stop-color="#d79c5b"/>
+        </linearGradient>
+        <linearGradient id="skin" x1="0" y1="0" x2=".4" y2="1">
+          <stop offset="0" stop-color="#7ccb62"/>
+          <stop offset="1" stop-color="#3d9846"/>
+        </linearGradient>
+
+        <!-- three-toed theropod foot; fill comes from the <use> element -->
+        <g id="footShape">
+          <path d="M-18 -6 C -4 -14 14 -12 24 -4 L 36 2 L 42 9 L 10 11 L -18 11 Q -25 4 -18 -6 Z"/>
+          <path d="M30 3 L 46 6 L 40 11 Z" opacity=".7"/>
+          <path d="M39 4 l 7 -1 l -5 5 Z" fill="#fff4dc" stroke="#c9b48c" stroke-width=".8"/>
+          <path d="M27 9 l 7 1 l -5 4 Z" fill="#fff4dc" stroke="#c9b48c" stroke-width=".8"/>
+        </g>
+
+        <g id="ballSym">
+          <circle r="22" fill="#e8792b" stroke="#a94a17" stroke-width="2"/>
+          <path d="M -22 0 H 22 M 0 -22 V 22" stroke="#7d3510" stroke-width="2" fill="none"/>
+          <path d="M -15 -19 C -5 -8 -5 8 -15 19" stroke="#7d3510" stroke-width="2" fill="none"/>
+          <path d="M 15 -19 C 5 -8 5 8 15 19" stroke="#7d3510" stroke-width="2" fill="none"/>
+          <ellipse cx="-8" cy="-9" rx="6" ry="4" fill="#ffb066" opacity=".5"/>
+        </g>
+
+        <g id="starSym">
+          <path d="M0 -10 L2.6 -2.6 L10 0 L2.6 2.6 L0 10 L-2.6 2.6 L-10 0 L-2.6 -2.6 Z" fill="#ffd166"/>
+        </g>
+      </defs>
+
+      <!-- ================= GYM ================= -->
+      <rect x="0" y="0" width="960" height="560" fill="url(#wall)"/>
+      <g id="lights">
+        <ellipse cx="190" cy="0" rx="210" ry="165" fill="url(#lightGlow)"/>
+        <ellipse cx="770" cy="0" rx="210" ry="165" fill="url(#lightGlow)"/>
+      </g>
+      <g id="crowd"></g>
+      <rect x="0" y="140" width="960" height="58" fill="#162a42" opacity=".5"/>
+      <g stroke="#3a5573" stroke-width="2" opacity=".45">
+        <path d="M0 158 H960 M0 178 H960"/>
+      </g>
+      <g id="banner">
+        <rect x="372" y="150" width="196" height="44" rx="6" fill="#c0392b" stroke="#8e2b20" stroke-width="2"/>
+        <text x="470" y="179" text-anchor="middle" fill="#fff3d6" font-size="19" font-weight="700"
+              letter-spacing="2" font-family="Arial,sans-serif">GO REX!</text>
+      </g>
+
+      <!-- ================= COURT ================= -->
+      <rect x="0" y="398" width="960" height="162" fill="url(#floor)"/>
+      <rect x="0" y="398" width="960" height="5" fill="#6f4420"/>
+      <g stroke="#7d4d22" stroke-width="1.5" opacity=".38">
+        <path d="M0 424 H960 M0 452 H960 M0 480 H960 M0 508 H960 M0 536 H960"/>
+      </g>
+      <g stroke="#f6e6c8" stroke-width="3" fill="none" opacity=".36">
+        <path d="M0 486 Q 480 408 960 486"/>
+        <path d="M 646 398 L 906 398 L 948 528 L 686 528 Z"/>
+        <ellipse cx="797" cy="466" rx="72" ry="26"/>
+      </g>
+
+      <!-- ================= HOOP ================= -->
+      <g id="hoop">
+        <path d="M 884 430 L 884 130 L 842 130" fill="none" stroke="#3c4857" stroke-width="15" stroke-linejoin="round"/>
+        <rect x="852" y="421" width="64" height="13" rx="4" fill="#2d3744"/>
+        <rect x="700" y="86" width="140" height="120" rx="6" fill="#f4f8fb" stroke="#c9d6e2" stroke-width="6"/>
+        <rect x="742" y="138" width="56" height="46" rx="2" fill="none" stroke="#e8524a" stroke-width="4"/>
+
+        <g id="netGroup" stroke="#ffffff" stroke-width="2" fill="none" opacity=".9">
+          <path d="M718 214 L748 270"/>
+          <path d="M735 216 L756 273"/>
+          <path d="M752 217 L764 273"/>
+          <path d="M770 217 L772 273"/>
+          <path d="M788 217 L780 273"/>
+          <path d="M805 216 L788 273"/>
+          <path d="M822 214 L796 270"/>
+          <path d="M726 232 Q770 242 814 232"/>
+          <path d="M736 250 Q770 260 804 250"/>
+          <path d="M744 266 Q770 274 796 266"/>
+          <ellipse cx="770" cy="271" rx="26" ry="6"/>
+        </g>
+
+        <path d="M 770 200 L 770 212" stroke="#b8491a" stroke-width="8"/>
+        <ellipse cx="770" cy="212" rx="52" ry="10" fill="none" stroke="#c94f1c" stroke-width="9"/>
+        <ellipse cx="770" cy="209" rx="52" ry="9" fill="none" stroke="#f4782e" stroke-width="5"/>
+        <path d="M 718 212 A 52 10 0 0 0 822 212" fill="none" stroke="#ff9b52" stroke-width="3" opacity=".8"/>
+      </g>
+
+      <!-- ================= HUD ================= -->
+      <g id="hud" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC','WenQuanYi Micro Hei','Segoe UI',Arial,sans-serif">
+        <rect x="24" y="20" width="356" height="78" rx="14" fill="#0c1826" opacity=".82"/>
+        <text x="42" y="50" fill="#ffffff" font-size="20" font-weight="700">三步上篮</text>
+        <text x="42" y="70" fill="#8fa6bd" font-size="10" letter-spacing="2.4">THREE-STEP LAYUP · T-REX</text>
+        <text id="hudStatus" x="42" y="90" fill="#ffd166" font-size="12.5" font-weight="600">助跑运球 · DRIBBLE</text>
+        <g id="stepDot1" transform="translate(298 46)">
+          <circle r="12" fill="#31465e" stroke="#4a6280" stroke-width="2"/>
+          <text y="5" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">1</text>
+        </g>
+        <g id="stepDot2" transform="translate(328 46)">
+          <circle r="12" fill="#31465e" stroke="#4a6280" stroke-width="2"/>
+          <text y="5" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">2</text>
+        </g>
+        <g id="stepDot3" transform="translate(358 46)">
+          <circle r="12" fill="#31465e" stroke="#4a6280" stroke-width="2"/>
+          <text y="5" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">3</text>
+        </g>
+      </g>
+
+      <!-- ================= ACTORS ================= -->
+      <g id="actors">
+        <ellipse id="shadow" cx="205" cy="432" rx="96" ry="10" fill="#1a1208" opacity=".2"/>
+
+        <g id="puff0" fill="#f6e8ca" opacity="0">
+          <circle cx="-18" cy="0" r="9"/><circle cx="0" cy="-7" r="11"/><circle cx="18" cy="0" r="8"/>
+        </g>
+        <g id="puff1" fill="#f6e8ca" opacity="0">
+          <circle cx="-18" cy="0" r="9"/><circle cx="0" cy="-7" r="11"/><circle cx="18" cy="0" r="8"/>
+        </g>
+        <g id="puff2" fill="#f6e8ca" opacity="0">
+          <circle cx="-18" cy="0" r="9"/><circle cx="0" cy="-7" r="11"/><circle cx="18" cy="0" r="8"/>
+        </g>
+
+        <!-- T-REX: local origin = hip, +x forward, +y down -->
+        <g id="dino" transform="translate(205 282) scale(0.82)">
+          <g id="tail">
+            <path d="M -44 -42 C -92 -56 -146 -30 -188 16 C -156 8 -128 22 -94 20 C -66 18 -48 6 -42 -12 Z"
+                  fill="url(#skin)" stroke="#2f7d38" stroke-width="2"/>
+            <path d="M -96 -30 l -10 14 M -126 -20 l -12 14 M -152 -6 l -12 12"
+                  stroke="#2b7034" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+          </g>
+
+          <!-- far leg -->
+          <path id="thighFar" d="M-16 8 L-30 100 L-34 180" fill="none" stroke="#2f7d38" stroke-width="30" stroke-linecap="round"/>
+          <path id="shinFar"  d="M-30 100 L-34 180"      fill="none" stroke="#34883e" stroke-width="20" stroke-linecap="round"/>
+          <circle id="kneeFar" cx="-30" cy="100" r="12" fill="#2f7d38"/>
+          <use id="footFar" href="#footShape" xlink:href="#footShape" fill="#2f7d38"/>
+
+          <g id="torso">
+            <path d="M -48 -30 C -56 -76 -18 -108 30 -104 C 78 -100 104 -70 98 -30 C 92 8 52 34 8 32 C -26 30 -44 6 -48 -30 Z"
+                  fill="url(#skin)" stroke="#2f7d38" stroke-width="2"/>
+            <path d="M -30 -74 l 9 -15 l 9 16 Z M -10 -92 l 9 -17 l 10 18 Z M 12 -102 l 9 -17 l 10 18 Z M 36 -104 l 9 -16 l 10 17 Z"
+                  fill="#2b7034"/>
+            <path d="M -18 -94 C 14 -108 60 -102 84 -78 C 90 -60 88 -44 78 -30 C 46 -18 6 -18 -16 -32 C -26 -50 -28 -76 -18 -94 Z"
+                  fill="#e8524a" stroke="#b93b34" stroke-width="2.5"/>
+            <path d="M 10 -100 Q 34 -84 56 -100" fill="none" stroke="#ffe9c9" stroke-width="6" stroke-linecap="round"/>
+            <path d="M -12 -84 Q -20 -58 -14 -34" fill="none" stroke="#ffd7c9" stroke-width="4" opacity=".6"/>
+            <text x="34" y="-50" text-anchor="middle" fill="#fff6e8" font-size="34" font-weight="800"
+                  font-family="Arial,sans-serif">23</text>
+
+            <path d="M 58 -92 C 70 -112 86 -128 106 -132 L 126 -108 C 108 -100 92 -84 84 -62 Z"
+                  fill="url(#skin)" stroke="#2f7d38" stroke-width="2"/>
+
+            <g id="head">
+              <path d="M 92 -138 C 100 -164 138 -174 166 -162 C 184 -154 194 -138 196 -122 L 226 -116 C 238 -113 240 -102 232 -94 L 216 -86 L 126 -86 C 104 -86 90 -100 88 -118 Z"
+                    fill="url(#skin)" stroke="#2f7d38" stroke-width="2.5"/>
+              <path d="M 122 -86 L 218 -86 C 230 -86 230 -72 220 -62 C 204 -48 164 -46 140 -52 C 126 -56 120 -72 120 -86 Z"
+                    fill="#6d2a2e"/>
+              <path d="M 148 -58 Q 176 -70 202 -58 Q 176 -50 148 -58 Z" fill="#e4737a"/>
+              <path d="M 122 -74 L 216 -74 C 224 -74 226 -64 216 -56 C 202 -44 166 -44 142 -50 C 130 -54 124 -62 122 -74 Z"
+                    fill="url(#skin)" stroke="#2f7d38" stroke-width="2.5"/>
+              <g fill="#fffaf0">
+                <path d="M134 -86 l11 0 l-5 10 Z"/><path d="M152 -86 l11 0 l-5 11 Z"/>
+                <path d="M170 -86 l11 0 l-5 10 Z"/><path d="M188 -86 l11 0 l-5 11 Z"/>
+                <path d="M206 -86 l10 0 l-5 9 Z"/>
+              </g>
+              <g fill="#fffaf0">
+                <path d="M142 -74 l11 0 l-5 -9 Z"/><path d="M162 -74 l11 0 l-5 -10 Z"/>
+                <path d="M182 -74 l11 0 l-5 -10 Z"/><path d="M200 -74 l10 0 l-5 -9 Z"/>
+              </g>
+              <circle cx="150" cy="-128" r="11" fill="#ffd34d" stroke="#2b6f31" stroke-width="2"/>
+              <ellipse cx="152" cy="-128" rx="3.4" ry="8" fill="#20301f"/>
+              <circle cx="147" cy="-132" r="2.2" fill="#ffffff"/>
+              <path d="M 132 -144 Q 150 -154 168 -140" fill="none" stroke="#2b7034" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="222" cy="-108" r="3" fill="#2b6f31"/>
+              <path d="M 108 -158 Q 116 -170 126 -158 Z M 166 -164 Q 176 -174 186 -160 Z" fill="#2b7034"/>
+            </g>
+
+            <g id="armFar">
+              <path d="M68 -52 Q 84 -40 98 -36" stroke="#2f7d38" stroke-width="11" fill="none" stroke-linecap="round"/>
+              <circle cx="98" cy="-36" r="6.5" fill="#2f7d38"/>
+              <path d="M101 -40 l 8 -4 M103 -35 l 9 0 M101 -30 l 8 4"
+                    stroke="#1f5c28" stroke-width="2.2" stroke-linecap="round"/>
+            </g>
+          </g>
+
+          <!-- near leg -->
+          <path id="thighNear" d="M14 14 L28 100 L16 180" fill="none" stroke="#4fb055" stroke-width="32" stroke-linecap="round"/>
+          <path id="shinNear"  d="M28 100 L16 180"      fill="none" stroke="#57bd60" stroke-width="21" stroke-linecap="round"/>
+          <circle id="kneeNear" cx="28" cy="100" r="13" fill="#4fb055"/>
+          <use id="footNear" href="#footShape" xlink:href="#footShape" fill="#4fb055"/>
+
+          <g id="armNear">
+            <path d="M76 -46 Q 92 -34 106 -30" stroke="#4fb055" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <circle cx="106" cy="-30" r="7" fill="#4fb055"/>
+            <path d="M110 -34 l 9 -4 M112 -29 l 10 0 M110 -24 l 9 4"
+                  stroke="#2b7034" stroke-width="2.4" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <use id="ball" href="#ballSym" xlink:href="#ballSym" transform="translate(297 300) rotate(0)"/>
+
+        <g id="sparkles" opacity="0">
+          <use href="#starSym" xlink:href="#starSym" transform="translate(700 178)"/>
+          <use href="#starSym" xlink:href="#starSym" transform="translate(846 166)"/>
+          <use href="#starSym" xlink:href="#starSym" transform="translate(738 300)"/>
+          <use href="#starSym" xlink:href="#starSym" transform="translate(824 292)"/>
+          <use href="#starSym" xlink:href="#starSym" transform="translate(770 118)"/>
+        </g>
+
+        <text id="swish" x="770" y="74" text-anchor="middle" fill="#ffd166" stroke="#7a3d10"
+              stroke-width="4" paint-order="stroke" font-size="30" font-weight="800"
+              font-family="Arial,sans-serif" opacity="0">SWISH! +2</text>
+      </g>
+    </svg>
+
+    <div class="bar">
+      <div>
+        <h1>霸王龙三步上篮</h1>
+        <p>SVG + JavaScript：三步、收球、起跳、打板、空心入网，循环回放。</p>
+      </div>
+      <span class="phase" id="phase">助跑运球 · DRIBBLE</span>
+      <button id="toggle" type="button">Pause</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  const $ = id => document.getElementById(id);
+
+  // ---------- tiny math helpers ----------
+  const lerp = (a, b, p) => a + (b - a) * p;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const easeInOut = p => p < .5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+  const mix = (A, B, p) => ({ x: lerp(A.x, B.x, p), y: lerp(A.y, B.y, p) });
+
+  function kf(t, keys) {                     // scalar keyframes [[time, value], ...]
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (t <= keys[i+1][0]) return lerp(keys[i][1], keys[i+1][1], seg(t, keys[i][0], keys[i+1][0]));
+    }
+    return keys[keys.length-1][1];
+  }
+
+  function spline(t, keys) {                 // smooth path through [[time, x, y], ...]
+    let i = 0;
+    while (i < keys.length - 2 && t > keys[i+1][0]) i++;
+    const p0 = keys[Math.max(0, i-1)], p1 = keys[i],
+          p2 = keys[i+1], p3 = keys[Math.min(keys.length-1, i+2)];
+    const u = clamp((t - p1[0]) / ((p2[0] - p1[0]) || 1), 0, 1);
+    const u2 = u*u, u3 = u2*u;
+    const h00 = 2*u3-3*u2+1, h10 = u3-2*u2+u, h01 = -2*u3+3*u2, h11 = u3-u2;
+    const m1x = (p2[1]-p0[1])*.5, m1y = (p2[2]-p0[2])*.5;
+    const m2x = (p3[1]-p1[1])*.5, m2y = (p3[2]-p1[2])*.5;
+    return {
+      x: h00*p1[1] + h10*m1x + h01*p2[1] + h11*m2x,
+      y: h00*p1[2] + h10*m1y + h01*p2[2] + h11*m2y
+    };
+  }
+
+  // ---------- constants ----------
+  const S = 0.82;                 // dino scale
+  const GROUND = 430;
+  const BASE_Y = 282;             // hip scene-y when standing (feet at 430)
+  const HIP_FAR  = { x: -16, y: 8 };
+  const HIP_NEAR = { x:  14, y: 14 };
+  const THIGH = 100, SHIN = 94;
+  const LOOP = 5.10;
+
+  // ---------- crowd (decorative) ----------
+  const crowd = $("crowd");
+  const crowdColors = ["#6b8fb5", "#8fa9c2", "#c98a6b", "#a2b7c9", "#5f9c8c", "#b98a9a"];
+  for (let row = 0; row < 3; row++) {
+    for (let i = 0; i < 39; i++) {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", 10 + i*25 + (row % 2)*12);
+      c.setAttribute("cy", 60 + row*29);
+      c.setAttribute("r", 5.4);
+      c.setAttribute("fill", crowdColors[(i + row*3) % crowdColors.length]);
+      c.setAttribute("opacity", ".32");
+      crowd.appendChild(c);
+    }
+  }
+
+  // ---------- timeline ----------
+  const dinoXKeys = [[0,205],[1.90,350],[2.05,358],[2.35,450],[2.60,495],[2.75,495],[3.10,502],[3.55,510],[5.10,510]];
+  const dinoYKeys = [[0,BASE_Y],[2.05,BASE_Y],[2.25,247],[2.50,207],[2.75,192],
+                     [3.05,207],[3.30,247],[3.55,BASE_Y],[3.80,276],[4.05,BASE_Y],
+                     [4.25,278],[4.55,BASE_Y],[5.10,BASE_Y]];
+  const armNearKeys = [[0,18],[.35,38],[.70,2],[1.05,38],[1.40,4],[1.60,20],
+                       [1.85,-48],[2.05,-58],[2.40,-88],[2.60,-100],[2.90,-100],
+                       [3.20,-60],[3.55,-70],[3.75,-125],[3.95,-75],[4.15,-125],
+                       [4.35,-80],[4.60,-55],[5.10,-55]];
+  const armFarKeys  = [[0,-10],[.5,10],[1.0,-10],[1.6,-5],[1.9,-42],[2.6,-80],
+                       [3.1,-40],[3.55,-30],[3.8,-95],[4.1,-40],[4.4,-90],[4.6,-25],[5.10,-25]];
+  // the head tips back during the leap so the ball clears the snout
+  const headTiltKeys = [[0,0],[2.05,0],[2.45,-18],[2.75,-24],[3.20,-10],[3.55,2],[4.10,0],[5.10,0]];
+
+  const dinoX = t => kf(t, dinoXKeys);
+  const dinoY = t => kf(t, dinoYKeys);
+  const armNear = t => kf(t, armNearKeys);
+  const armFar  = t => kf(t, armFarKeys);
+  const headTilt = t => kf(t, headTiltKeys);
+
+  // three explicit footfalls (scene x of each plant, plus a gather adjustment)
+  const nearSteps = [
+    { plant: 185, swing: null },
+    { plant: 245, swing: [0.15, 0.55] },   // STEP 1
+    { plant: 305, swing: [1.15, 1.60] },   // STEP 3
+    { plant: 335, swing: [1.72, 1.95] }    // gather
+  ];
+  const farSteps = [
+    { plant: 160, swing: null },
+    { plant: 265, swing: [0.65, 1.05] },   // STEP 2
+    { plant: 320, swing: [1.72, 1.95] }    // gather
+  ];
+
+  function footLocal(steps, t, cx) {
+    let prev = steps[0].plant;
+    for (let i = 1; i < steps.length; i++) {
+      const [a, b] = steps[i].swing, dest = steps[i].plant;
+      if (t < a) return { x: (prev - cx)/S, y: 180 };
+      if (t <= b) {
+        const p = (t - a)/(b - a), e = easeInOut(p);
+        const sx = prev + (dest - prev)*e;
+        return { x: (sx - cx)/S, y: 180 - 34*Math.sin(Math.PI*p) };
+      }
+      prev = dest;
+    }
+    return { x: (prev - cx)/S, y: 180 };
+  }
+
+  // two-bone inverse kinematics for the big hind legs
+  function ik(H, P) {
+    let dx = P.x - H.x, dy = P.y - H.y;
+    let d = Math.hypot(dx, dy) || 0.001;
+    const maxD = THIGH + SHIN - 0.01, minD = Math.abs(THIGH - SHIN) + 0.01;
+    if (d > maxD) { const s = maxD/d; dx *= s; dy *= s; d = maxD; }
+    if (d < minD) { const s = minD/d; dx *= s; dy *= s; d = minD; }
+    const ux = dx/d, uy = dy/d;
+    const along = (THIGH*THIGH - SHIN*SHIN + d*d)/(2*d);
+    const out = Math.sqrt(Math.max(0, THIGH*THIGH - along*along));
+    return { x: H.x + ux*along + uy*out, y: H.y + uy*along - ux*out };
+  }
+
+  const RELEASE_T = 2.50;
+  const cradle = t => ({ x: dinoX(t) + 78, y: dinoY(t) - 25 });
+  const rel = { x: dinoX(RELEASE_T) + 100, y: dinoY(RELEASE_T) - 35 };
+  const lastDribble = {
+    x: dinoX(1.60) + 92,
+    y: 408 - 112*Math.abs(Math.sin(3*Math.PI*1.60/1.65))
+  };
+  const c185 = cradle(1.85), c220 = cradle(2.20);
+
+  // ball is gathered to the chest, then flicked forward UNDER the snout
+  const holdKeys = [
+    [1.60, lastDribble.x,  lastDribble.y],
+    [1.85, c185.x, c185.y],
+    [2.20, c220.x, c220.y],
+    [RELEASE_T, rel.x, rel.y]
+  ];
+  const flight = [
+    [RELEASE_T, rel.x, rel.y],
+    [2.68, 650, 158],
+    [2.88, 730, 150],       // reaches the glass
+    [3.02, 750, 166],       // bank off the backboard square
+    [3.16, 760, 188],
+    [3.30, 772, 212],       // at the rim
+    [3.48, 772, 262],       // through the net
+    [3.68, 780, 300],
+    [3.88, 792, 392],       // bounce on the floor
+    [4.08, 804, 366],
+    [4.28, 816, 394],
+    [4.60, 824, 396]
+  ];
+
+  // ---------- DOM handles ----------
+  const actors = $("actors"), dino = $("dino"), ball = $("ball"), shadow = $("shadow");
+  const thighFar = $("thighFar"), shinFar = $("shinFar"), kneeFar = $("kneeFar"), footFar = $("footFar");
+  const thighNear = $("thighNear"), shinNear = $("shinNear"), kneeNear = $("kneeNear"), footNear = $("footNear");
+  const tail = $("tail"), head = $("head"), aNear = $("armNear"), aFar = $("armFar");
+  const netGroup = $("netGroup"), sparkles = $("sparkles"), swish = $("swish");
+  const puffEls = [$("puff0"), $("puff1"), $("puff2")];
+  const dots = [$("stepDot1"), $("stepDot2"), $("stepDot3")];
+  const hudStatus = $("hudStatus"), phase = $("phase"), toggle = $("toggle");
+
+  const puffTimes = [0.55, 1.05, 1.60];
+  const puffXs    = [245, 265, 305];
+  const doneTimes = [0.55, 1.05, 1.60];
+
+  function statusFor(t) {
+    if (t < 0.15) return "助跑运球 · DRIBBLE";
+    if (t < 0.65) return "第一步 · STEP 1";
+    if (t < 1.15) return "第二步 · STEP 2";
+    if (t < 1.60) return "第三步 · STEP 3";
+    if (t < 2.05) return "收球起跳 · GATHER";
+    if (t < 2.75) return "上篮！ · LAYUP!";
+    if (t < 3.30) return "打板 · BANK SHOT";
+    if (t < 4.40) return "空心入网 · SWISH! +2";
+    return "下一回合 · REPLAY";
+  }
+
+  function render(t) {
+    const cx = dinoX(t), cy = dinoY(t);
+    dino.setAttribute("transform", "translate(" + cx.toFixed(2) + " " + cy.toFixed(2) + ") scale(" + S + ")");
+
+    // ---- feet / legs ----
+    const frozen = dinoX(Math.min(t, 1.95));
+    let fFar  = footLocal(farSteps,  Math.min(t, 1.95), t <= 1.95 ? cx : frozen);
+    let fNear = footLocal(nearSteps, Math.min(t, 1.95), t <= 1.95 ? cx : frozen);
+    if (t > 1.95) {
+      const up = easeInOut(seg(t, 1.98, 2.38));
+      fFar  = mix(fFar,  { x: -34, y: 112 }, up);
+      fNear = mix(fNear, { x:  26, y: 128 }, up);
+      const down = easeInOut(seg(t, 3.18, 3.55));
+      fFar  = mix(fFar,  { x: -34, y: 180 }, down);
+      fNear = mix(fNear, { x:  16, y: 180 }, down);
+    }
+    const kFar = ik(HIP_FAR, fFar), kNear = ik(HIP_NEAR, fNear);
+    thighFar.setAttribute("d", "M" + HIP_FAR.x + " " + HIP_FAR.y + " L" + kFar.x.toFixed(1) + " " + kFar.y.toFixed(1));
+    shinFar.setAttribute("d",  "M" + kFar.x.toFixed(1) + " " + kFar.y.toFixed(1) + " L" + fFar.x.toFixed(1) + " " + fFar.y.toFixed(1));
+    thighNear.setAttribute("d", "M" + HIP_NEAR.x + " " + HIP_NEAR.y + " L" + kNear.x.toFixed(1) + " " + kNear.y.toFixed(1));
+    shinNear.setAttribute("d",  "M" + kNear.x.toFixed(1) + " " + kNear.y.toFixed(1) + " L" + fNear.x.toFixed(1) + " " + fNear.y.toFixed(1));
+    kneeFar.setAttribute("cx", kFar.x.toFixed(1));   kneeFar.setAttribute("cy", kFar.y.toFixed(1));
+    kneeNear.setAttribute("cx", kNear.x.toFixed(1)); kneeNear.setAttribute("cy", kNear.y.toFixed(1));
+    footFar.setAttribute("transform",  "translate(" + fFar.x.toFixed(1)  + " " + fFar.y.toFixed(1)  + ") rotate(" + (fFar.y  < 170 ? -11 : 0) + ")");
+    footNear.setAttribute("transform", "translate(" + fNear.x.toFixed(1) + " " + fNear.y.toFixed(1) + ") rotate(" + (fNear.y < 170 ? -11 : 0) + ")");
+
+    // ---- wagging parts ----
+    tail.setAttribute("transform", "rotate(" + (5.5*Math.sin(t*7)).toFixed(2) + " -44 -20)");
+    head.setAttribute("transform", "rotate(" + (headTilt(t) + 2.2*Math.sin(t*5 + 1)).toFixed(2) + " 100 -100)");
+    aNear.setAttribute("transform", "rotate(" + armNear(t).toFixed(2) + " 76 -46)");
+    aFar.setAttribute("transform",  "rotate(" + armFar(t).toFixed(2)  + " 68 -52)");
+
+    // ---- ball ----
+    let bp, spin = t*390, scale = 1;
+    if (t < 1.60) {
+      const bounce = Math.abs(Math.sin(3*Math.PI*t/1.65));
+      bp = { x: cx + 92, y: 408 - 112*bounce };
+    } else if (t < RELEASE_T) {
+      bp = spline(t, holdKeys);
+    } else {
+      bp = spline(Math.min(t, 4.60), flight);
+      scale = 1 - 0.13*Math.max(0, 1 - Math.abs(t - 3.39)/0.17);
+    }
+    ball.setAttribute("transform", "translate(" + bp.x.toFixed(1) + " " + bp.y.toFixed(1) + ") rotate(" + spin.toFixed(1) + ") scale(" + scale.toFixed(3) + ")");
+
+    // ---- shadow ----
+    const jump = clamp((BASE_Y - cy)/90, 0, 1);
+    shadow.setAttribute("cx", cx.toFixed(1));
+    shadow.setAttribute("rx", (96 - 38*jump).toFixed(1));
+    shadow.setAttribute("opacity", (0.2 - 0.11*jump).toFixed(3));
+
+    // ---- dust puffs at each footfall ----
+    for (let i = 0; i < 3; i++) {
+      const age = t - puffTimes[i];
+      const k = age < 0 || age > 0.38 ? 0 : 1 - age/0.38;
+      puffEls[i].setAttribute("opacity", (k*0.85).toFixed(3));
+      puffEls[i].setAttribute("transform", "translate(" + puffXs[i] + " 424) scale(" + (0.5 + 0.9*(1-k)).toFixed(2) + ")");
+    }
+
+    // ---- net swish ----
+    const nw = t > 3.30 ? 6.5*Math.sin((t-3.30)*21)*Math.exp(-(t-3.30)*3.2) : 0;
+    netGroup.setAttribute("transform", "rotate(" + nw.toFixed(2) + " 770 212)");
+
+    // ---- score celebration ----
+    const scoreK = clamp(seg(t, 3.36, 4.35), 0, 1);
+    sparkles.setAttribute("opacity", (Math.sin(Math.PI*scoreK)*0.95).toFixed(3));
+    sparkles.setAttribute("transform", "translate(770 210) scale(" + (0.85 + 0.35*Math.sin(Math.PI*scoreK)).toFixed(3) + ") translate(-770 -210)");
+    const pop = clamp(seg(t, 3.38, 3.58), 0, 1);
+    const sink = clamp(seg(t, 4.05, 4.40), 0, 1);
+    swish.setAttribute("opacity", (pop*(1-sink)).toFixed(3));
+    swish.setAttribute("transform", "translate(770 74) scale(" + (0.55 + 0.55*easeInOut(pop)).toFixed(3) + ") translate(-770 -74)");
+
+    // ---- HUD ----
+    const st = statusFor(t);
+    if (hudStatus.textContent !== st) { hudStatus.textContent = st; phase.textContent = st; }
+    for (let i = 0; i < 3; i++) {
+      dots[i].firstElementChild.setAttribute("fill", t >= doneTimes[i] ? "#ffb03b" : "#31465e");
+    }
+
+    // ---- loop crossfade ----
+    const fadeIn  = clamp(seg(t, 0, 0.25), 0, 1);
+    const fadeOut = 1 - clamp(seg(t, 4.60, 4.92), 0, 1);
+    actors.setAttribute("opacity", Math.min(fadeIn, fadeOut).toFixed(3));
+  }
+
+  // ---------- driver ----------
+  let t = 0, last = performance.now(), running = true;
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last)/1000);
+    last = now;
+    if (running) { t += dt; if (t >= LOOP) t -= LOOP; }
+    render(t);
+    requestAnimationFrame(frame);
+  }
+
+  function setRunning(on) {
+    running = on;
+    document.body.classList.toggle("paused", !on);
+    toggle.textContent = on ? "Pause" : "Play";
+    toggle.setAttribute("aria-pressed", String(!on));
+  }
+  toggle.addEventListener("click", () => setRunning(!running));
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) setRunning(false);
+
+  render(0);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

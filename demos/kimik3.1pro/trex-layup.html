@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>霸王龙 · 三步上篮 — SVG 动画</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #eaf1df;
+      --muted: #9fb4ae;
+      --night: #0d2933;
+      --panel: #123640;
+      --orange: #f28b54;
+      --mint: #a9c98e;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 3.5vw, 42px);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(80,133,123,.18), transparent 32%),
+        radial-gradient(circle at 90% 90%, rgba(242,139,84,.09), transparent 28%),
+        #091f27;
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    }
+
+    main { width: min(1180px, 100%); }
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 0 4px 18px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.12;
+      letter-spacing: -.04em;
+    }
+    h1 span { color: var(--mint); }
+    .controls { display: flex; gap: 9px; flex: none; }
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 1px solid rgba(234,241,223,.15);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.055);
+      font: 700 13px/1 inherit;
+      cursor: pointer;
+      transition: background .18s ease, transform .18s ease, border-color .18s ease;
+    }
+    button:hover { background: rgba(255,255,255,.11); border-color: rgba(234,241,223,.3); transform: translateY(-2px); }
+    button:focus-visible { outline: 3px solid rgba(169,201,142,.4); outline-offset: 3px; }
+    button svg { width: 15px; height: 15px; }
+
+    figure {
+      overflow: hidden;
+      margin: 0;
+      border: 1px solid rgba(234,241,223,.12);
+      border-radius: clamp(20px, 3vw, 32px);
+      background: var(--panel);
+      box-shadow: 0 28px 80px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.05);
+    }
+    .scene { display: block; width: 100%; height: auto; }
+
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid rgba(234,241,223,.09);
+      background: rgba(234,241,223,.09);
+    }
+    .phases li {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 58px;
+      padding: 12px;
+      color: #91aaa6;
+      background: #102f39;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .phases b {
+      display: grid;
+      place-items: center;
+      width: 25px;
+      height: 25px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      font-size: 11px;
+    }
+    .phase-one { animation: phase-one 7s linear infinite; }
+    .phase-two { animation: phase-two 7s linear infinite; }
+    .phase-three { animation: phase-three 7s linear infinite; }
+
+    figcaption {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 13px 6px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    figcaption span:last-child { color: #617f7d; }
+
+    /* One seven-second timeline drives the entire layup. */
+    .trex-motion { animation: trex-travel 7s linear infinite; transform-box: view-box; }
+    .trex-visibility { animation: trex-visibility 7s linear infinite; }
+    .ball-motion { animation: ball-flight 7s linear infinite; transform-box: view-box; }
+    .ball-visibility { animation: ball-visibility 7s linear infinite; }
+    .ball-spin { animation: ball-spin .62s linear infinite; transform-box: view-box; transform-origin: 535px 390px; }
+    .dino-shadow { animation: shadow-travel 7s linear infinite; transform-box: view-box; transform-origin: 420px 604px; }
+    .body-bob { animation: body-bob .35s ease-in-out infinite alternate; transform-box: view-box; transform-origin: 390px 440px; }
+    .head-focus { animation: head-focus 7s ease-in-out infinite; transform-box: view-box; transform-origin: 450px 300px; }
+    .jersey-number { animation: number-flash 7s linear infinite; }
+    .net { animation: net-sway 7s linear infinite; transform-box: view-box; transform-origin: 951px 322px; }
+    .score-pop { animation: score-pop 7s ease-out infinite; transform-box: view-box; transform-origin: 935px 230px; }
+    .speed-one { animation: speed-one 7s linear infinite; }
+    .speed-two { animation: speed-two 7s linear infinite; }
+    .dust { animation: dust 7s ease-out infinite; transform-box: view-box; transform-origin: 675px 583px; }
+    .crowd-arm-a { animation: cheer .7s ease-in-out infinite alternate; transform-origin: 160px 385px; }
+    .crowd-arm-b { animation: cheer .9s ease-in-out -.3s infinite alternate-reverse; transform-origin: 730px 380px; }
+    .light-beam { animation: light-pulse 4s ease-in-out infinite alternate; }
+    .sweat { animation: sweat 7s linear infinite; }
+
+    @keyframes trex-travel {
+      0%, 8% { transform: translate(0, 0); }
+      22% { transform: translate(70px, 0); }
+      36% { transform: translate(140px, 0); }
+      48% { transform: translate(195px, -68px); }
+      58% { transform: translate(250px, -120px); }
+      66% { transform: translate(270px, -105px); }
+      78% { transform: translate(292px, -35px); }
+      86%, 96% { transform: translate(305px, 0); }
+      96.01%, 100% { transform: translate(0, 0); }
+    }
+    @keyframes trex-visibility {
+      0%, 89% { opacity: 1; }
+      94%, 97% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes ball-flight {
+      0%, 8% { transform: translate(0, 0); }
+      22% { transform: translate(70px, 0); }
+      36% { transform: translate(140px, 0); }
+      48% { transform: translate(195px, -68px); }
+      56% { transform: translate(245px, -118px); }
+      61% { transform: translate(315px, -165px); }
+      65% { transform: translate(365px, -145px); }
+      70% { transform: translate(405px, -90px); }
+      74% { transform: translate(410px, -58px); }
+      82% { transform: translate(410px, 100px); }
+      87% { transform: translate(392px, 137px); }
+      92%, 96% { transform: translate(375px, 108px); }
+      96.01%, 100% { transform: translate(0, 0); }
+    }
+    @keyframes ball-visibility {
+      0%, 90% { opacity: 1; }
+      94%, 98% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes ball-spin { to { transform: rotate(360deg); } }
+    @keyframes shadow-travel {
+      0%, 8% { transform: translate(0,0) scale(1); opacity: .32; }
+      22% { transform: translate(70px,0) scale(.95); opacity: .3; }
+      36% { transform: translate(140px,0) scale(.9); opacity: .28; }
+      58% { transform: translate(250px,0) scale(.48); opacity: .14; }
+      66% { transform: translate(270px,0) scale(.55); opacity: .16; }
+      86%, 96% { transform: translate(305px,0) scale(1); opacity: .32; }
+      96.01%, 100% { transform: translate(0,0) scale(1); opacity: .32; }
+    }
+    @keyframes body-bob { to { transform: translateY(-3px) rotate(-.5deg); } }
+    @keyframes head-focus {
+      0%, 36%, 100% { transform: rotate(0); }
+      48%, 68% { transform: rotate(-5deg); }
+      82% { transform: rotate(3deg); }
+    }
+    @keyframes number-flash { 0%, 70%, 82%, 100% { fill: #173e3b; } 74%, 78% { fill: #f28b54; } }
+    @keyframes net-sway {
+      0%, 70%, 84%, 100% { transform: skewX(0); }
+      74% { transform: skewX(10deg) scaleY(1.1); }
+      78% { transform: skewX(-7deg) scaleY(.96); }
+    }
+    @keyframes score-pop {
+      0%, 69% { opacity: 0; transform: translateY(18px) scale(.65) rotate(-8deg); }
+      73% { opacity: 1; transform: translateY(0) scale(1.12) rotate(-8deg); }
+      78% { opacity: 1; transform: translateY(-10px) scale(1) rotate(-8deg); }
+      88%, 100% { opacity: 0; transform: translateY(-45px) scale(.95) rotate(-8deg); }
+    }
+    @keyframes speed-one { 0%, 7%, 38%, 100% { opacity: 0; } 12%, 32% { opacity: .8; } }
+    @keyframes speed-two { 0%, 35%, 69%, 100% { opacity: 0; } 44%, 61% { opacity: .75; } }
+    @keyframes dust {
+      0%, 81% { opacity: 0; transform: scale(.3) translateY(8px); }
+      85% { opacity: .75; transform: scale(1) translateY(0); }
+      92%, 100% { opacity: 0; transform: scale(1.5) translateY(-12px); }
+    }
+    @keyframes cheer { to { transform: rotate(8deg) translateY(-3px); } }
+    @keyframes light-pulse { to { opacity: .55; } }
+    @keyframes sweat { 0%, 37%, 66%, 100% { opacity: 0; } 44%, 58% { opacity: .8; } }
+
+    @keyframes phase-one {
+      0%, 20% { color: #102f39; background: #a9c98e; }
+      23%, 100% { color: #91aaa6; background: #102f39; }
+    }
+    @keyframes phase-two {
+      0%, 20% { color: #91aaa6; background: #102f39; }
+      23%, 35% { color: #102f39; background: #f0c979; }
+      38%, 100% { color: #91aaa6; background: #102f39; }
+    }
+    @keyframes phase-three {
+      0%, 35% { color: #91aaa6; background: #102f39; }
+      39%, 82% { color: #102f39; background: #f28b54; }
+      86%, 100% { color: #91aaa6; background: #102f39; }
+    }
+
+    .paused .scene *, .paused .scene, .paused .phases li { animation-play-state: paused !important; }
+    @media (max-width: 650px) {
+      body { padding: 15px; }
+      header { align-items: center; gap: 12px; }
+      .eyebrow { font-size: 9px; }
+      .controls { gap: 6px; }
+      button { padding: 10px 12px; }
+      .button-label { display: none; }
+      .phases li { gap: 6px; min-height: 52px; padding: 8px 4px; font-size: 11px; }
+      .phases b { width: 22px; height: 22px; }
+      figcaption span:last-child { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scene *, .scene, .phases li { animation-play-state: paused !important; }
+      button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">SVG 动画 · 篮球时间</p>
+        <h1>霸王龙 · <span>三步上篮</span></h1>
+      </div>
+      <div class="controls">
+        <button id="restartButton" type="button" aria-label="从头重播">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.1 5.1A6 6 0 1 1 2 10.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.7 1.8v4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="button-label">重播</span>
+        </button>
+        <button id="motionToggle" type="button" aria-label="暂停动画">
+          <svg id="pauseIcon" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor"/><rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor"/></svg>
+          <svg id="playIcon" viewBox="0 0 16 16" aria-hidden="true" style="display:none"><path d="M4 2.8c0-.8.9-1.3 1.6-.9l8 5.2c.6.4.6 1.4 0 1.8l-8 5.2c-.7.4-1.6-.1-1.6-.9V2.8Z" fill="currentColor"/></svg>
+          <span class="button-label" id="buttonLabel">暂停</span>
+        </button>
+      </div>
+    </header>
+
+    <figure>
+      <svg class="scene" id="trexScene" viewBox="0 0 1200 760" role="img" aria-labelledby="sceneTitle sceneDesc" xmlns="http://www.w3.org/2000/svg">
+        <title id="sceneTitle">霸王龙在篮球场上完成三步上篮</title>
+        <desc id="sceneDesc">一只穿着三号球衣的绿色霸王龙，跨两步后腾空，将橙色篮球送入右侧篮筐。动画循环播放，底部标注跨步、蹬地和腾空出手三个阶段。</desc>
+        <defs>
+          <linearGradient id="arena" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0b2732"/>
+            <stop offset="1" stop-color="#1a4950"/>
+          </linearGradient>
+          <linearGradient id="court" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#d6a96e"/>
+            <stop offset="1" stop-color="#b67d4f"/>
+          </linearGradient>
+          <linearGradient id="dinoGreen" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a8c98c"/>
+            <stop offset="1" stop-color="#6f9e73"/>
+          </linearGradient>
+          <linearGradient id="jersey" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff4d8"/>
+            <stop offset="1" stop-color="#e5dbc1"/>
+          </linearGradient>
+          <radialGradient id="ballOrange" cx="35%" cy="28%">
+            <stop offset="0" stop-color="#ffbf68"/>
+            <stop offset="1" stop-color="#e66f3f"/>
+          </radialGradient>
+          <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff8cf" stop-opacity=".18"/>
+            <stop offset="1" stop-color="#fff8cf" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="blurShadow" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
+          <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <clipPath id="courtClip"><path d="M0 487H1200V760H0Z"/></clipPath>
+        </defs>
+
+        <!-- Arena -->
+        <rect width="1200" height="760" fill="url(#arena)"/>
+        <path class="light-beam" d="M115 0h125l170 490H0Z" fill="url(#beam)"/>
+        <path class="light-beam" d="M805 0h115l210 490H650Z" fill="url(#beam)" style="animation-delay:-2s"/>
+        <g fill="#fff6cf" filter="url(#glow)">
+          <rect x="92" y="44" width="172" height="12" rx="6" opacity=".85"/>
+          <rect x="770" y="44" width="172" height="12" rx="6" opacity=".85"/>
+        </g>
+        <g fill="#173d47" stroke="#315963" stroke-width="3">
+          <path d="M0 134H1200M0 242H1200M0 350H1200"/>
+        </g>
+        <g fill="#254e56" opacity=".85">
+          <circle cx="70" cy="205" r="22"/><circle cx="129" cy="191" r="25"/><circle cx="194" cy="211" r="23"/><circle cx="262" cy="190" r="24"/>
+          <circle cx="334" cy="207" r="25"/><circle cx="410" cy="189" r="23"/><circle cx="479" cy="207" r="24"/><circle cx="551" cy="191" r="25"/>
+          <circle cx="625" cy="208" r="22"/><circle cx="694" cy="189" r="24"/><circle cx="767" cy="207" r="25"/><circle cx="845" cy="190" r="24"/>
+          <circle cx="920" cy="208" r="23"/><circle cx="995" cy="189" r="25"/><circle cx="1070" cy="207" r="24"/><circle cx="1140" cy="190" r="23"/>
+        </g>
+        <g fill="#102f39">
+          <path d="M42 310q0-72 49-72t49 72Z"/><path d="M151 310q0-79 52-79t52 79Z"/><path d="M271 310q0-70 49-70t49 70Z"/>
+          <path d="M390 310q0-78 53-78t53 78Z"/><path d="M515 310q0-70 49-70t49 70Z"/><path d="M630 310q0-78 53-78t53 78Z"/>
+          <path d="M752 310q0-70 49-70t49 70Z"/><path d="M866 310q0-78 53-78t53 78Z"/><path d="M990 310q0-70 49-70t49 70Z"/><path d="M1100 310q0-76 50-76t50 76Z"/>
+        </g>
+        <g class="crowd-arm-a" fill="none" stroke="#254e56" stroke-width="16" stroke-linecap="round">
+          <path d="M146 359 109 294M171 352l42-67"/>
+        </g>
+        <g class="crowd-arm-b" fill="none" stroke="#254e56" stroke-width="16" stroke-linecap="round">
+          <path d="M716 360 682 291M741 352l43-66"/>
+        </g>
+        <g fill="#f0c979" opacity=".7">
+          <circle cx="113" cy="292" r="5"/><circle cx="213" cy="285" r="5"/><circle cx="682" cy="291" r="5"/><circle cx="784" cy="286" r="5"/>
+        </g>
+        <path d="M0 407c230-38 426-21 620-3 203 19 377 9 580-20v120H0Z" fill="#0d2933" opacity=".65"/>
+        <g font-family="monospace" font-weight="800" letter-spacing="4">
+          <text x="66" y="112" fill="#74928e" font-size="16">LAYUP CAM</text>
+          <circle cx="52" cy="106" r="5" fill="#f28b54"/>
+          <text x="1030" y="410" fill="#74928e" font-size="14">DINO 03</text>
+        </g>
+
+        <!-- Maple court -->
+        <path d="M0 487H1200V760H0Z" fill="url(#court)"/>
+        <g clip-path="url(#courtClip)" fill="none">
+          <path d="M0 543H1200M0 650H1200M0 728H1200" stroke="#f4d49b" stroke-width="2" opacity=".3"/>
+          <path d="M130 487 70 760M345 487l-18 273M570 487l22 273M792 487l63 273M1000 487l115 273" stroke="#8e5f43" stroke-width="2" opacity=".35"/>
+          <path d="M-80 628H1280" stroke="#f8e7bf" stroke-width="6" opacity=".9"/>
+          <ellipse cx="1010" cy="618" rx="214" ry="105" stroke="#f8e7bf" stroke-width="5" opacity=".75"/>
+          <path d="M1035 487v273" stroke="#f8e7bf" stroke-width="5" opacity=".75"/>
+        </g>
+        <path d="M0 487H1200" stroke="#f5cf92" stroke-width="5"/>
+
+        <!-- Basket and support -->
+        <g>
+          <path d="M1135 207v379M1135 261l-118-90" fill="none" stroke="#1a3035" stroke-width="22" stroke-linecap="round"/>
+          <path d="M1135 207v379M1135 261l-118-90" fill="none" stroke="#4e6c6d" stroke-width="10" stroke-linecap="round"/>
+          <rect x="1003" y="117" width="25" height="222" rx="5" fill="#d8e9df" stroke="#193d40" stroke-width="7"/>
+          <rect x="1009" y="125" width="12" height="205" rx="2" fill="#9dbcb6" opacity=".55"/>
+          <path d="M1003 300h-97" stroke="#f4eee0" stroke-width="8"/>
+          <path d="M1004 320H906" stroke="#203b3f" stroke-width="13" stroke-linecap="round"/>
+          <path d="M1004 316H906" stroke="#f07c4d" stroke-width="8" stroke-linecap="round"/>
+          <ellipse cx="953" cy="320" rx="48" ry="10" fill="none" stroke="#f07c4d" stroke-width="7"/>
+          <g class="net" fill="none" stroke="#e7eddc" stroke-width="3" opacity=".9">
+            <path d="M910 326l16 82q27 18 55 0l16-82M922 328l13 76M939 329l4 82M956 329l-3 83M974 328l-10 78M990 326l-18 79"/>
+            <path d="M916 351q38 18 76 0M921 377q33 17 66 0M926 407q27 13 55 0"/>
+          </g>
+        </g>
+
+        <!-- Motion lines and ground shadow -->
+        <g class="speed-one" fill="none" stroke="#f8e7bf" stroke-width="6" stroke-linecap="round">
+          <path d="M91 393h132M60 428h102M137 462h86"/>
+        </g>
+        <g class="speed-two" fill="none" stroke="#f8e7bf" stroke-width="5" stroke-linecap="round">
+          <path d="M345 196h105M310 228h82M385 257h75"/>
+        </g>
+        <ellipse class="dino-shadow" cx="420" cy="604" rx="132" ry="18" fill="#173d3b" filter="url(#blurShadow)"/>
+
+        <!-- The dinosaur fades before the timeline resets. -->
+        <g class="trex-visibility">
+          <g class="trex-motion">
+            <!-- Tail -->
+            <g class="body-bob">
+              <path d="M373 373C293 336 213 342 104 270c48 93 138 169 259 185l52-36Z" fill="url(#dinoGreen)" stroke="#193f3b" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M136 303c68 50 135 73 209 86" fill="none" stroke="#c5d9a6" stroke-width="6" stroke-linecap="round" opacity=".65"/>
+              <path d="M199 351l-16 19M245 368l-13 21M291 382l-11 20" stroke="#537e62" stroke-width="5" stroke-linecap="round"/>
+            </g>
+
+            <!-- Back leg: dark outline then green inner stroke, sharing the same poses. -->
+            <path d="M365 414Q315 470 300 530Q300 555 335 560L380 560" fill="none" stroke="#193f3b" stroke-width="39" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.08;.22;.36;.48;.58;.66;.78;.86;.94;1" values="M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q325 455 357 498Q380 524 352 540L325 542;M365 414Q420 480 430 545Q445 562 482 560L520 560;M365 414Q330 450 380 480Q408 495 427 472L448 453;M365 414Q350 450 405 465Q430 470 450 450L470 430;M365 414Q340 458 390 485Q415 498 438 478L460 460;M365 414Q325 480 330 540Q338 560 375 560L415 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560"/>
+            </path>
+            <path d="M365 414Q315 470 300 530Q300 555 335 560L380 560" fill="none" stroke="#709c70" stroke-width="27" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.08;.22;.36;.48;.58;.66;.78;.86;.94;1" values="M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q325 455 357 498Q380 524 352 540L325 542;M365 414Q420 480 430 545Q445 562 482 560L520 560;M365 414Q330 450 380 480Q408 495 427 472L448 453;M365 414Q350 450 405 465Q430 470 450 450L470 430;M365 414Q340 458 390 485Q415 498 438 478L460 460;M365 414Q325 480 330 540Q338 560 375 560L415 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560;M365 414Q315 470 300 530Q300 555 335 560L380 560"/>
+            </path>
+
+            <!-- Body and jersey -->
+            <g class="body-bob">
+              <path d="M337 289c57-42 124-3 142 68 20 79-16 128-83 119-65-9-113-62-104-119 5-32 18-51 45-68Z" fill="url(#dinoGreen)" stroke="#193f3b" stroke-width="6"/>
+              <path d="M325 315c34-28 91-31 126 5l19 105c-40 45-112 46-151 1Z" fill="url(#jersey)" stroke="#193f3b" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M326 317l22 9-12 106-17-6ZM449 319l-20 10 24 107 17-11Z" fill="#ef8253"/>
+              <path d="M351 299q38 29 76 0" fill="none" stroke="#ef8253" stroke-width="12"/>
+              <path d="M334 423q60 29 127 0" fill="none" stroke="#c5bda8" stroke-width="4"/>
+              <text class="jersey-number" x="393" y="398" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="65" font-weight="900" transform="rotate(4 393 398)">03</text>
+              <path d="M353 449q43 20 84-2" fill="none" stroke="#d8e4bd" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+            </g>
+
+            <!-- Front leg -->
+            <path d="M415 420Q460 480 475 545Q490 562 530 560L565 560" fill="none" stroke="#193f3b" stroke-width="42" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.08;.22;.36;.48;.58;.66;.78;.86;.94;1" values="M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q475 470 490 540Q503 560 542 560L580 560;M415 420Q390 455 420 495Q450 522 425 542L390 548;M415 420Q455 445 435 478Q425 500 465 495L498 485;M415 420Q460 435 470 465Q480 487 515 468L540 448;M415 420Q455 445 450 475Q448 495 482 490L512 478;M415 420Q480 470 500 535Q512 558 548 560L585 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560"/>
+            </path>
+            <path d="M415 420Q460 480 475 545Q490 562 530 560L565 560" fill="none" stroke="#8fb17d" stroke-width="29" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.08;.22;.36;.48;.58;.66;.78;.86;.94;1" values="M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q475 470 490 540Q503 560 542 560L580 560;M415 420Q390 455 420 495Q450 522 425 542L390 548;M415 420Q455 445 435 478Q425 500 465 495L498 485;M415 420Q460 435 470 465Q480 487 515 468L540 448;M415 420Q455 445 450 475Q448 495 482 490L512 478;M415 420Q480 470 500 535Q512 558 548 560L585 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560;M415 420Q460 480 475 545Q490 562 530 560L565 560"/>
+            </path>
+
+
+            <!-- Neck and head -->
+            <g class="head-focus">
+              <path d="M413 330c25-34 14-87 55-112l75 39c-45 23-37 83-66 111Z" fill="url(#dinoGreen)" stroke="#193f3b" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M456 314c19-37 15-61 43-82" fill="none" stroke="#d0dfaf" stroke-width="7" stroke-linecap="round" opacity=".7"/>
+              <path d="M455 189c23-38 78-43 113-16 23 17 28 38 52 45l35 12-15 67-119 2c-47 1-80-20-85-56-3-21 4-39 19-54Z" fill="url(#dinoGreen)" stroke="#193f3b" stroke-width="6" stroke-linejoin="round"/>
+              <path d="M493 260c42 13 101 10 151-1l-8 34c-45 30-112 25-145-5Z" fill="#315c50" stroke="#193f3b" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M510 266l12 20 12-18 13 22 13-20 14 19 12-21 13 16 12-20" fill="#fff5d8" stroke="#193f3b" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M498 294q52 27 113 2" fill="none" stroke="#e58a72" stroke-width="7" stroke-linecap="round"/>
+              <path d="M629 222l26 8-7 19-24-4Z" fill="#92b17e"/>
+              <circle cx="632" cy="229" r="3.5" fill="#193f3b"/>
+              <path d="M508 195q25-19 52 0" fill="none" stroke="#193f3b" stroke-width="8" stroke-linecap="round"/>
+              <ellipse cx="536" cy="211" rx="14" ry="16" fill="#fff7dc"/>
+              <circle cx="541" cy="212" r="7" fill="#152f32"/>
+              <circle cx="544" cy="208" r="2.5" fill="#fff"/>
+              <path d="M466 184q46-34 97-9" fill="none" stroke="#ef8253" stroke-width="12"/>
+              <path d="M468 181l-20-19M480 174l-9-25" stroke="#ef8253" stroke-width="7" stroke-linecap="round"/>
+              <path d="M452 235q-15 8-20 25" fill="none" stroke="#c9dcaa" stroke-width="5" stroke-linecap="round"/>
+            </g>
+
+            <!-- Small arms, with an exaggerated reach at release. -->
+            <path d="M449 342Q485 331 516 365" fill="none" stroke="#193f3b" stroke-width="25" stroke-linecap="round"/>
+            <path d="M449 342Q485 331 516 365" fill="none" stroke="#709c70" stroke-width="15" stroke-linecap="round"/>
+            <path d="M470 340Q510 340 550 375" fill="none" stroke="#193f3b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.36;.48;.56;.61;.66;.78;1" values="M470 340Q510 340 550 375;M470 340Q510 340 550 375;M470 340Q525 320 580 320;M470 340Q540 305 600 305;M470 340Q540 315 610 320;M470 340Q540 330 590 345;M470 340Q510 340 550 375;M470 340Q510 340 550 375"/>
+            </path>
+            <path d="M470 340Q510 340 550 375" fill="none" stroke="#a4c589" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
+              <animate attributeName="d" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.36;.48;.56;.61;.66;.78;1" values="M470 340Q510 340 550 375;M470 340Q510 340 550 375;M470 340Q525 320 580 320;M470 340Q540 305 600 305;M470 340Q540 315 610 320;M470 340Q540 330 590 345;M470 340Q510 340 550 375;M470 340Q510 340 550 375"/>
+            </path>
+            <g class="sweat" fill="#c5e7df">
+              <path d="M625 167q16 21 0 29-16-8 0-29Z"/>
+              <path d="M655 187q12 16 0 22-12-6 0-22Z"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- Ball follows the hands, then arcs through the hoop. -->
+        <g class="ball-visibility">
+          <g class="ball-motion">
+            <g class="ball-spin">
+              <circle cx="535" cy="390" r="25" fill="url(#ballOrange)" stroke="#693f32" stroke-width="4"/>
+              <path d="M510 390h50M535 365v50M516 371q20 19 0 38M554 371q-20 19 0 38" fill="none" stroke="#7e4431" stroke-width="3"/>
+              <path d="M520 375q7-7 15-7" fill="none" stroke="#ffd58a" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- Landing dust and score feedback -->
+        <g class="dust" fill="#f1d19c">
+          <circle cx="653" cy="584" r="8"/><circle cx="677" cy="576" r="12"/><circle cx="704" cy="585" r="7"/>
+          <path d="M627 586q21-26 42 0M690 585q25-31 48 0" fill="none" stroke="#f1d19c" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="score-pop">
+          <text x="910" y="231" fill="#f0c979" stroke="#193f3b" stroke-width="7" paint-order="stroke" font-family="Arial Black, sans-serif" font-size="68" font-weight="900">+2</text>
+          <path d="M872 172l-12-22M927 157l4-25M977 177l18-19" stroke="#f0c979" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <g font-family="monospace" font-size="13" fill="#6e8d88" letter-spacing="2">
+          <text x="38" y="724">TINY ARMS. BIG DREAMS.</text>
+          <text x="1018" y="724">SVG / 07S</text>
+        </g>
+      </svg>
+
+      <ol class="phases" aria-label="上篮步骤">
+        <li class="phase-one"><b>01</b><span>右脚跨步</span></li>
+        <li class="phase-two"><b>02</b><span>左脚蹬地</span></li>
+        <li class="phase-three"><b>03</b><span>腾空出手</span></li>
+      </ol>
+      <figcaption>
+        <span>小短手，也有大梦想。</span>
+        <span>纯 SVG · 7 秒循环 · 无外部素材</span>
+      </figcaption>
+    </figure>
+  </main>
+
+  <script>
+    const scene = document.getElementById('trexScene');
+    const toggle = document.getElementById('motionToggle');
+    const restart = document.getElementById('restartButton');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const playIcon = document.getElementById('playIcon');
+    const label = document.getElementById('buttonLabel');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let paused = false;
+
+    function renderMotionState() {
+      document.body.classList.toggle('paused', paused);
+      if (paused) scene.pauseAnimations();
+      else scene.unpauseAnimations();
+      toggle.setAttribute('aria-label', paused ? '播放动画' : '暂停动画');
+      label.textContent = paused ? '播放' : '暂停';
+      pauseIcon.style.display = paused ? 'none' : '';
+      playIcon.style.display = paused ? '' : 'none';
+    }
+
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      renderMotionState();
+    });
+
+    restart.addEventListener('click', () => {
+      document.getAnimations().forEach(animation => { animation.currentTime = 0; });
+      scene.setCurrentTime(0);
+      if (paused) scene.pauseAnimations();
+    });
+
+    if (reducedMotion.matches) {
+      paused = true;
+      renderMotionState();
+    }
+  </script>
+</body>
+</html>
