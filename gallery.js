@@ -20,16 +20,9 @@ const nameLabel = document.getElementById("model-name");
 const frame = document.getElementById("work");
 const taskInputs = Array.from(document.querySelectorAll('input[name="task"]'));
 const params = new URLSearchParams(location.search);
+const requestedModel = params.get("model");
 let task = params.get("task") === "trex" ? "trex" : "pelican";
-let model = params.get("model") || models[0].id;
-
-function choices() {
-  if (task === "pelican") return models;
-  return models.flatMap((entry) => entry.id === "glm5.4" ? [
-    { ...entry, name: "GLM-5.4 → GLM-5.3 Flash", menuLabel: "GLM-5.4 → GLM-5.3 Flash（接力）" },
-    { id: "glm-draft", name: "GLM-5.4（中间稿）", logo: "glm", dir: "glm5.4", file: "trex-layup-1.html" }
-  ] : [entry]);
-}
+let model = requestedModel === "glm-draft" ? "glm5.4" : requestedModel || models[0].id;
 
 function icon(entry) {
   const img = document.createElement("img");
@@ -47,14 +40,14 @@ function closeMenu(restoreFocus = false) {
 }
 
 function showWork() {
-  const selected = choices().find((entry) => entry.id === model) || models[0];
+  const selected = models.find((entry) => entry.id === model) || models[0];
   model = selected.id;
   nameLabel.textContent = selected.name;
   trigger.setAttribute("aria-label", `选择模型，当前 ${selected.name}`);
   trigger.querySelector("img").src = icon(selected).src;
 
   const { title, file } = tasks[task];
-  const source = `demos/${selected.dir || model}/${selected.file || file}`;
+  const source = `demos/${selected.id}/${file}`;
   frame.title = `${selected.name} · ${title}`;
   if (frame.getAttribute("src") !== source) frame.src = source;
   if (location.protocol === "https:" || location.protocol === "http:") {
@@ -66,7 +59,7 @@ function showWork() {
 }
 
 function openMenu(focusLast = false) {
-  const options = choices().map((entry) => {
+  const options = models.map((entry) => {
     const option = document.createElement("button");
     option.type = "button";
     option.className = "model-option";
@@ -74,7 +67,7 @@ function openMenu(focusLast = false) {
     option.setAttribute("aria-checked", String(entry.id === model));
     option.tabIndex = -1;
     const label = document.createElement("span");
-    label.textContent = entry.menuLabel || entry.name;
+    label.textContent = entry.name;
     option.append(icon(entry), label);
     if (entry.id === model) {
       const mark = document.createElement("span");
@@ -134,7 +127,6 @@ for (const input of taskInputs) {
   input.checked = task === input.value;
   input.addEventListener("change", () => {
     task = input.value;
-    if (task === "pelican" && model === "glm-draft") model = "glm5.4";
     closeMenu();
     showWork();
   });
