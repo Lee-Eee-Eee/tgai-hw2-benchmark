@@ -1,11 +1,9 @@
-# SVG 动画实验
+# SVG 动画基准
 
-[GitHub Pages](https://lee-eee-eee.github.io/tgai-hw2-benchmark/)
+[在线展厅](https://lee-eee-eee.github.io/tgai-hw2-benchmark/)
 
-两项任务是鹈鹕骑自行车与霸王龙三步上篮。网页可并排回放八套 Agent 配置的输出，支持切换题目、重播与打开原始 HTML。GLM 上篮另存接力前的中间稿。
+用页面上方的题目和模型选择器切换作品。`demos/` 保存 16 份首轮成品及 GLM 上篮的中间稿，页面在沙盒中直接播放这些 HTML。
 
-- `demos/` 保存实验原始 HTML。
-- `media/` 的画面来自 GPT-6.2 Astra 和 Claude Fable 5.2 的鹈鹕或上篮，以及 Gemini 4 Neon 的上篮。英文字体 Young Serif 与 Source Serif 4 随附 SIL Open Font License。
-- `data.js` 保存模型配置与播放器索引，`index.html` 含原始提示词、用时表及直接链接。
+界面参考 [Pelican Benchmark 的动态图展示](https://pelicanbenchmark.com/?track=animated_html)。模型标识的来源见 `media/brands/README.md`。
 
-本地可运行 `python -m http.server 8000`，然后打开 `http://localhost:8000/`。
+本地直接打开 `index.html`，或在此目录执行 `python -m http.server 8000`。

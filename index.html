@@ -3,136 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="八套 Agent 配置的 SVG 动画实验，在线回放并排比较鹈鹕骑自行车与霸王龙三步上篮。">
   <meta name="color-scheme" content="light">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; frame-src 'self'; base-uri 'none'; form-action 'none'">
-  <title>两道题，十六部动画 · SVG 动画实验</title>
-  <link rel="icon" type="image/svg+xml" href="media/favicon.svg">
+  <meta name="description" content="八套 Agent 配置的 SVG 动画原作。选择题目与模型，观看鹈鹕骑自行车或霸王龙三步上篮。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; frame-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>SVG 动画基准</title>
+  <link rel="icon" href="media/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <script defer src="data.js"></script>
-  <script defer src="gallery.js"></script>
+  <script src="gallery.js" defer></script>
 </head>
 <body>
-  <a class="skip" href="#compare">跳到动画对照</a>
-  <header class="masthead">
-    <div class="wrap masthead-inner">
-      <a class="wordmark" href="./">SVG 动画实验</a>
-      <nav aria-label="网页导航">
-        <a href="#compare">动画对照</a>
-        <a href="#record">实验记录</a>
-      </nav>
+  <header class="toolbar">
+    <h1>SVG 动画基准</h1>
+    <fieldset class="tasks">
+      <legend class="sr-only">选择题目</legend>
+      <label><input type="radio" name="task" value="pelican" checked><span>鹈鹕骑车</span></label>
+      <label><input type="radio" name="task" value="trex"><span>霸王龙上篮</span></label>
+    </fieldset>
+    <div class="model-picker">
+      <button type="button" id="model-button" aria-haspopup="menu" aria-expanded="false" aria-controls="model-menu">
+        <img src="media/brands/claude.png" width="20" height="20" alt="">
+        <span id="model-name">Claude Fable 5.2</span>
+        <span class="chevron" aria-hidden="true"></span>
+      </button>
+      <div id="model-menu" role="menu" aria-label="选择模型" hidden></div>
     </div>
   </header>
-  <main>
-    <section class="hero" aria-labelledby="main-title">
-      <div class="wrap program">
-        <div class="hero-copy">
-          <h1 id="main-title">两道题，十六部动画</h1>
-          <p>把两道 SVG 动画题交给八套 Agent 配置，播放原作，逐个比较脚踏和上篮动作。</p>
-          <a class="button primary" href="#compare">并排播放两部作品 <span aria-hidden="true">↓</span></a>
-        </div>
-        <div class="program-films">
-          <a class="film film-ride" href="#compare" data-pick-task="pelican">
-            <div class="film-art"><img src="media/pelican.webp" alt="一只白色鹈鹕骑着自行车" width="800" height="500" fetchpriority="high"></div>
-            <span class="film-label"><strong>鹈鹕骑自行车</strong><span>GPT-6.2 Astra <span aria-hidden="true">↗</span></span></span>
-          </a>
-          <a class="film film-shot" href="#compare" data-pick-task="trex">
-            <div class="film-art"><img src="media/trex.webp" alt="球场上的霸王龙正在向篮筐起跳" width="800" height="500"></div>
-            <span class="film-label"><strong>霸王龙三步上篮</strong><span>Claude Fable 5.2 <span aria-hidden="true">↗</span></span></span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section id="compare" class="wrap compare" aria-labelledby="compare-title">
-      <div class="section-head">
-        <h2 id="compare-title">动画对照</h2>
-        <button class="button secondary" type="button" id="layout-toggle" aria-pressed="true">切换为单屏</button>
-      </div>
-      <div class="viewer" data-ui>
-        <fieldset class="tasks">
-          <legend class="sr-only">选择题目</legend>
-          <label><input type="radio" name="task" value="pelican" checked><span>鹈鹕骑自行车</span></label>
-          <label><input type="radio" name="task" value="trex"><span>霸王龙三步上篮</span></label>
-        </fieldset>
-        <div class="view-grid">
-          <article class="screen" aria-label="左侧动画">
-            <div class="screen-top">
-              <label for="model-left" class="sr-only">左侧动画模型</label>
-              <select id="model-left"></select>
-              <a class="original" target="_blank" rel="noopener">打开原页 <span aria-hidden="true">↗</span></a>
-            </div>
-            <div class="stage"></div>
-            <div class="screen-foot">
-              <p class="model-config"></p>
-              <button type="button" class="replay">重播</button>
-            </div>
-          </article>
-          <article class="screen" aria-label="右侧动画">
-            <div class="screen-top">
-              <label for="model-right" class="sr-only">右侧动画模型</label>
-              <select id="model-right"></select>
-              <a class="original" target="_blank" rel="noopener">打开原页 <span aria-hidden="true">↗</span></a>
-            </div>
-            <div class="stage"></div>
-            <div class="screen-foot">
-              <p class="model-config"></p>
-              <button type="button" class="replay">重播</button>
-            </div>
-          </article>
-        </div>
-        <p class="sr-only" id="viewer-status" role="status"></p>
-        <noscript><p>并排播放需要 JavaScript。也可在下方实验记录中打开任一原始 HTML。</p></noscript>
-      </div>
-    </section>
-
-    <section id="record" class="record" aria-labelledby="record-title">
-      <div class="wrap">
-        <div class="section-head">
-          <h2 id="record-title">实验记录</h2>
-          <p>同一套配置在同一会话里依次完成两题。两列耗时沿用当时的记录。</p>
-        </div>
-        <div class="prompts">
-          <figure><figcaption>鹈鹕骑自行车</figcaption><blockquote lang="en">Generate an SVG of a pelican riding a bicycle (animated HTML)</blockquote></figure>
-          <figure><figcaption>霸王龙三步上篮</figcaption><blockquote>用SVG绘制霸王龙三步上篮（动画HTML）</blockquote></figure>
-        </div>
-        <div class="table-scroll" tabindex="0" role="region" aria-label="模型、耗时与原始动画">
-          <table>
-            <thead><tr><th scope="col">模型</th><th scope="col">入口 / 配置</th><th scope="col">鹈鹕</th><th scope="col">霸王龙</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Claude Fable 5.2</th><td>Claude Code · Extra</td><td><a href="demos/claudefable5.2/pelican-bicycle.html">未记录</a></td><td><a href="demos/claudefable5.2/trex-layup.html">未记录</a></td></tr>
-              <tr><th scope="row">DeepSeek V4.1 Flash 1017</th><td>DeepSeek Harness · max</td><td><a href="demos/deepseekv4.1flash1017/pelican-bicycle.html">31:50</a></td><td><a href="demos/deepseekv4.1flash1017/trex-layup.html">25:51</a></td></tr>
-              <tr><th scope="row">Gemini 4 Neon</th><td>Gemini App · 任务模式</td><td><a href="demos/gemini4neon/pelican-bicycle.html">约 3 分钟</a></td><td><a href="demos/gemini4neon/trex-layup.html">约 5 分钟</a></td></tr>
-              <tr><th scope="row">GLM-5.4</th><td>chat.z.ai · 最高</td><td><a href="demos/glm5.4/pelican-bicycle.html">约 20 分钟</a></td><td><a href="demos/glm5.4/trex-layup.html">约 50 分钟*</a></td></tr>
-              <tr><th scope="row">GPT-6.2 Astra</th><td>Codex · Ultra</td><td><a href="demos/gpt6.2astra/pelican-bicycle.html">9:30</a></td><td><a href="demos/gpt6.2astra/trex-layup.html">9:23</a></td></tr>
-              <tr><th scope="row">Hy4</th><td>DeepSeek Harness · High</td><td><a href="demos/Hy4/pelican-bicycle.html">9:45</a></td><td><a href="demos/Hy4/trex-layup.html">23:08</a></td></tr>
-              <tr><th scope="row">Kimi K3.1 Pro</th><td>Zcode · 最高</td><td><a href="demos/kimik3.1pro/pelican-bicycle.html">10:52</a></td><td><a href="demos/kimik3.1pro/trex-layup.html">15:45</a></td></tr>
-              <tr><th scope="row">Qwen4-Max</th><td>Zcode</td><td><a href="demos/qwen4max/pelican-bicycle.html">3:49</a></td><td><a href="demos/qwen4max/trex-layup.html">5:18</a></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="table-note">点击时间可打开原页。* GLM-5.4 遇到服务拥挤，留下<a href="demos/glm5.4/trex-layup-1.html">中间稿</a>，后由 GLM-5.3 Flash 接力。约 50 分钟包含失败及接力过程。</p>
-        <div class="observations">
-          <div>
-            <h3>看脚与踏板</h3>
-            <p>一圈中，脚、曲柄和踏板的位置需要跟着同一运动相位，才看得出鹈鹕在发力。</p>
-            <figure><img src="media/detail-ride.webp" alt="Claude 作品的脚、曲柄、踏板和链条局部" width="760" height="374" loading="lazy"><figcaption>Claude Fable 5.2 · 骑行局部</figcaption></figure>
-          </div>
-          <div>
-            <h3>看手与球</h3>
-            <p>上篮的关键帧要能读出起步、起跳、出手和入网。阶段字幕可以提示节奏，身体、球和篮筐的空间关系决定动作能否成立。</p>
-            <figure><img src="media/detail-shot.webp" alt="Gemini 作品的跳起、篮球和篮板局部" width="760" height="374" loading="lazy"><figcaption>Gemini 4 Neon · 上篮局部</figcaption></figure>
-          </div>
-        </div>
-      </div>
-    </section>
+  <main class="stage" aria-label="动画原作">
+    <iframe id="work" title="动画原作" sandbox="allow-scripts allow-downloads"></iframe>
+    <noscript><a href="demos/claudefable5.2/pelican-bicycle.html">打开默认动画</a></noscript>
   </main>
-  <footer class="footer">
-    <div class="wrap footer-inner">
-      <span class="wordmark">SVG 动画实验</span>
-      <a href="https://simonwillison.net/2024/Oct/25/pelicans-on-a-bicycle/">经典鹈鹕测试出处 <span aria-hidden="true">↗</span></a>
-      <a href="https://github.com/Lee-Eee-Eee/tgai-hw2-benchmark">GitHub 源码 <span aria-hidden="true">↗</span></a>
-    </div>
-  </footer>
 </body>
 </html>
