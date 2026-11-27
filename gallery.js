@@ -50,18 +50,19 @@ function showWork(screen, replay = false) {
     frame.setAttribute("sandbox", "allow-scripts allow-downloads");
     frame.src = source;
     stage.replaceChildren(frame);
-    statusLine.textContent = `播放 ${frame.title}`;
-    replayButton.textContent = "重播";
+    const action = reducedMotion.matches ? "已显示" : "播放";
+    statusLine.textContent = `${action} ${frame.title}`;
+    replayButton.textContent = reducedMotion.matches ? "重新载入" : "重播";
   }
 
   if (reducedMotion.matches && !replay) {
     const poster = document.createElement("button");
     poster.type = "button";
     poster.className = "play-poster";
-    poster.textContent = `播放 ${workLabel}`;
+    poster.textContent = `显示 ${workLabel} 的作品`;
     poster.addEventListener("click", play, { once: true });
     stage.replaceChildren(poster);
-    replayButton.textContent = "播放";
+    replayButton.textContent = "加载动画";
     return;
   }
   play();
